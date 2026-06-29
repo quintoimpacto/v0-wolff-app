@@ -24,6 +24,12 @@ import {
   isMedicalDataValid,
   type MedicalData,
 } from "./medical-step";
+import {
+  HabitsStep,
+  emptyHabitsData,
+  isHabitsDataValid,
+  type HabitsData,
+} from "./habits-step";
 
 const STEPS = [
   {
@@ -54,6 +60,7 @@ export default function FormularioPage() {
   const [personal, setPersonal] = useState<PersonalData>(emptyPersonalData);
   const [activity, setActivity] = useState<ActivityData>(emptyActivityData);
   const [medical, setMedical] = useState<MedicalData>(emptyMedicalData);
+  const [habits, setHabits] = useState<HabitsData>(emptyHabitsData);
 
   const isLastStep = step === STEPS.length - 1;
   const progress = ((step + 1) / STEPS.length) * 100;
@@ -68,7 +75,7 @@ export default function FormularioPage() {
         ? isActivityDataValid(activity)
         : step === 2
           ? isMedicalDataValid(medical)
-          : true;
+          : isHabitsDataValid(habits);
 
   function updatePersonal(patch: Partial<PersonalData>) {
     setPersonal((prev) => ({ ...prev, ...patch }));
@@ -82,8 +89,17 @@ export default function FormularioPage() {
     setMedical((prev) => ({ ...prev, ...patch }));
   }
 
+  function updateHabits(patch: Partial<HabitsData>) {
+    setHabits((prev) => ({ ...prev, ...patch }));
+  }
+
   function goNext() {
-    if (!isLastStep && canContinue) setStep((s) => s + 1);
+    if (!canContinue) return;
+    if (isLastStep) {
+      // Último paso: enviar el formulario (lógica de envío pendiente).
+      return;
+    }
+    setStep((s) => s + 1);
   }
 
   function goBack() {
@@ -168,12 +184,7 @@ export default function FormularioPage() {
           ) : step === 2 ? (
             <MedicalStep value={medical} onChange={updateMedical} />
           ) : (
-            /* Placeholder for upcoming fields */
-            <div className="mt-6 flex flex-1 items-center justify-center rounded-xl border border-dashed border-border bg-background/60 p-6 text-center">
-              <p className="text-[1em] leading-relaxed text-muted-foreground">
-                Los campos de esta sección se agregarán próximamente.
-              </p>
-            </div>
+            <HabitsStep value={habits} onChange={updateHabits} />
           )}
         </section>
 
@@ -183,7 +194,7 @@ export default function FormularioPage() {
             size="lg"
             className="h-14 w-full text-base"
             onClick={goNext}
-            disabled={isLastStep || !canContinue}
+            disabled={!canContinue}
           >
             {isLastStep ? (
               <>
