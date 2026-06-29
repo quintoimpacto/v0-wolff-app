@@ -288,7 +288,7 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
           {SEX_OPTIONS.map((option) => (
             <label
               key={option.value}
-              className="flex cursor-pointer items-center gap-3 rounded-xl border border-input bg-background p-3.5 transition-colors has-data-checked:border-primary has-data-checked:bg-primary/5"
+              className="flex cursor-pointer items-center gap-3 rounded-xl border border-input bg-background p-3.5 transition-colors has-data-checked:border-primary"
             >
               <RadioGroupItem value={option.value} className="size-[1.25em]" />
               <span className="text-[1em] text-foreground">{option.label}</span>

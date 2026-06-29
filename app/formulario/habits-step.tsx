@@ -84,7 +84,7 @@ const selectItemClass =
 
 // Misma fila seleccionable con radio que usan los pasos anteriores.
 const radioRowClass =
-  "flex cursor-pointer items-center gap-3 rounded-xl border border-input bg-background p-3.5 transition-colors has-data-checked:border-primary has-data-checked:bg-primary/5";
+  "flex cursor-pointer items-center gap-3 rounded-xl border border-input bg-background p-3.5 transition-colors has-data-checked:border-primary";
 
 /** Indica si los campos obligatorios del paso están completos. */
 export function isHabitsDataValid(data: HabitsData): boolean {
