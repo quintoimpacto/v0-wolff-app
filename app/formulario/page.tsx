@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
@@ -61,6 +61,11 @@ export default function FormularioPage() {
   const [activity, setActivity] = useState<ActivityData>(emptyActivityData);
   const [medical, setMedical] = useState<MedicalData>(emptyMedicalData);
   const [habits, setHabits] = useState<HabitsData>(emptyHabitsData);
+
+  // Al cambiar de paso, subimos la pantalla para mostrar siempre la primera pregunta.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [step]);
 
   const isLastStep = step === STEPS.length - 1;
   const progress = ((step + 1) / STEPS.length) * 100;
