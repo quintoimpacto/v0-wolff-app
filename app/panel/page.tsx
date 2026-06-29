@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { CalendarDays, Lock, Users } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
-import { EkgLine } from "@/components/ekg-line";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,7 +47,6 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <WolffLogo width={140} height={101} className="w-32" priority />
-          <EkgLine className="my-1 h-5 w-40 text-primary/25" />
           <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Lock className="size-5" aria-hidden="true" />
           </span>
@@ -125,8 +123,6 @@ function PanelDashboard() {
             {today}
           </p>
         </div>
-        {/* Acento de marca: la línea de EKG del logo como divisor sutil */}
-        <EkgLine className="mt-5 h-5 w-full text-primary/20" />
 
         <Card className="mt-8">
           <CardContent className="flex flex-col items-center justify-center gap-3 px-6 py-20 text-center">
