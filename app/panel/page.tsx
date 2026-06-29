@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { mutate } from "swr";
 import Link from "next/link";
-import { CalendarDays, Lock, Users } from "lucide-react";
+import { CalendarDays, Lock } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { EkgLine } from "@/components/ekg-line";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PatientList } from "./patient-list";
+import { PatientDetail } from "./patient-detail";
 
 // Simple placeholder gate — not real authentication.
 const PANEL_PASSWORD = "wolff";
@@ -94,6 +97,8 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 }
 
 function PanelDashboard() {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
   const today = new Intl.DateTimeFormat("es-AR", {
     weekday: "long",
     day: "numeric",
@@ -101,10 +106,25 @@ function PanelDashboard() {
     year: "numeric",
   }).format(new Date());
 
+  // Vista de detalle a pantalla completa (ideal para mobile).
+  if (selectedId !== null) {
+    return (
+      <PatientDetail
+        id={selectedId}
+        onBack={() => setSelectedId(null)}
+        onArchived={() => {
+          // Refrescamos la lista y volvemos al listado.
+          void mutate("/api/patients");
+          setSelectedId(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-secondary">
       <header className="border-b border-border bg-background">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
+        <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
           <Button
             variant="outline"
@@ -115,7 +135,7 @@ function PanelDashboard() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
         <div className="flex flex-col gap-1.5">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Pacientes de hoy
@@ -128,20 +148,7 @@ function PanelDashboard() {
         {/* Acento de marca: la línea de EKG del logo como divisor sutil */}
         <EkgLine className="mt-5 h-5 w-full text-primary/20" />
 
-        <Card className="mt-8">
-          <CardContent className="flex flex-col items-center justify-center gap-3 px-6 py-20 text-center">
-            <span className="flex size-14 items-center justify-center rounded-full bg-secondary text-muted-foreground">
-              <Users className="size-7" aria-hidden="true" />
-            </span>
-            <p className="text-lg font-medium text-foreground">
-              Todavía no hay pacientes
-            </p>
-            <p className="max-w-sm text-balance text-sm leading-relaxed text-muted-foreground">
-              Cuando los pacientes completen el formulario en la sala de espera, sus
-              fichas van a aparecer acá.
-            </p>
-          </CardContent>
-        </Card>
+        <PatientList onSelect={(id) => setSelectedId(id)} />
       </main>
     </div>
   );
