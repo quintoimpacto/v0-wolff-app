@@ -18,6 +18,12 @@ import {
   isActivityDataValid,
   type ActivityData,
 } from "./activity-step";
+import {
+  MedicalStep,
+  emptyMedicalData,
+  isMedicalDataValid,
+  type MedicalData,
+} from "./medical-step";
 
 const STEPS = [
   {
@@ -47,6 +53,7 @@ export default function FormularioPage() {
   const [scaleIndex, setScaleIndex] = useState(DEFAULT_SCALE_INDEX);
   const [personal, setPersonal] = useState<PersonalData>(emptyPersonalData);
   const [activity, setActivity] = useState<ActivityData>(emptyActivityData);
+  const [medical, setMedical] = useState<MedicalData>(emptyMedicalData);
 
   const isLastStep = step === STEPS.length - 1;
   const progress = ((step + 1) / STEPS.length) * 100;
@@ -59,7 +66,9 @@ export default function FormularioPage() {
       ? isPersonalDataValid(personal)
       : step === 1
         ? isActivityDataValid(activity)
-        : true;
+        : step === 2
+          ? isMedicalDataValid(medical)
+          : true;
 
   function updatePersonal(patch: Partial<PersonalData>) {
     setPersonal((prev) => ({ ...prev, ...patch }));
@@ -67,6 +76,10 @@ export default function FormularioPage() {
 
   function updateActivity(patch: Partial<ActivityData>) {
     setActivity((prev) => ({ ...prev, ...patch }));
+  }
+
+  function updateMedical(patch: Partial<MedicalData>) {
+    setMedical((prev) => ({ ...prev, ...patch }));
   }
 
   function goNext() {
@@ -152,6 +165,8 @@ export default function FormularioPage() {
             <PersonalDataStep value={personal} onChange={updatePersonal} />
           ) : step === 1 ? (
             <ActivityStep value={activity} onChange={updateActivity} />
+          ) : step === 2 ? (
+            <MedicalStep value={medical} onChange={updateMedical} />
           ) : (
             /* Placeholder for upcoming fields */
             <div className="mt-6 flex flex-1 items-center justify-center rounded-xl border border-dashed border-border bg-background/60 p-6 text-center">
