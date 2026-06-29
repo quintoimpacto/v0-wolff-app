@@ -105,6 +105,10 @@ const inputClass =
 const selectTriggerClass =
   "w-full justify-between rounded-xl border-border px-4 py-3.5 text-[1em] data-[size=default]:h-auto";
 
+// Resaltado de la opción: tinte suave de la marca (nunca el dorado de --accent).
+const selectItemClass =
+  "rounded-lg py-2.5 text-[1em] focus:bg-primary/10 focus:text-foreground data-highlighted:bg-primary/10 data-highlighted:text-foreground data-selected:bg-primary/10 data-selected:text-primary";
+
 interface PersonalDataStepProps {
   value: PersonalData;
   onChange: (patch: Partial<PersonalData>) => void;
@@ -177,7 +181,7 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: 31 }, (_, i) => String(i + 1)).map((d) => (
-                  <SelectItem key={d} value={d}>
+                  <SelectItem key={d} value={d} className={selectItemClass}>
                     {d}
                   </SelectItem>
                 ))}
@@ -200,7 +204,7 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
               </SelectTrigger>
               <SelectContent>
                 {MONTHS.map((name, i) => (
-                  <SelectItem key={name} value={String(i + 1)}>
+                  <SelectItem key={name} value={String(i + 1)} className={selectItemClass}>
                     {name}
                   </SelectItem>
                 ))}

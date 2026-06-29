@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Minus, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
-import { EkgLine } from "@/components/ekg-line";
 import { cn } from "@/lib/utils";
 import {
   PersonalDataStep,
@@ -68,30 +67,30 @@ export default function FormularioPage() {
       <header className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
           <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
-          <div className="flex items-center gap-1" role="group" aria-label="Tamaño del texto">
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-11 rounded-full"
+          <div
+            className="flex items-stretch overflow-hidden rounded-full border border-border"
+            role="group"
+            aria-label="Tamaño del texto"
+          >
+            <button
+              type="button"
               onClick={() => setScaleIndex((i) => Math.max(0, i - 1))}
               disabled={scaleIndex === 0}
               aria-label="Reducir tamaño del texto"
+              className="flex h-11 w-12 items-center justify-center font-semibold leading-none text-foreground transition-colors hover:bg-muted disabled:opacity-40"
             >
-              <Minus className="size-4" aria-hidden="true" />
-            </Button>
-            <span className="px-1 text-sm font-medium text-muted-foreground" aria-hidden="true">
-              A
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-11 rounded-full"
+              <span className="text-xs" aria-hidden="true">A</span>
+            </button>
+            <span className="w-px self-stretch bg-border" aria-hidden="true" />
+            <button
+              type="button"
               onClick={() => setScaleIndex((i) => Math.min(SCALES.length - 1, i + 1))}
               disabled={scaleIndex === SCALES.length - 1}
               aria-label="Aumentar tamaño del texto"
+              className="flex h-11 w-12 items-center justify-center font-bold leading-none text-foreground transition-colors hover:bg-muted disabled:opacity-40"
             >
-              <Plus className="size-4" aria-hidden="true" />
-            </Button>
+              <span className="text-2xl" aria-hidden="true">A</span>
+            </button>
           </div>
         </div>
       </header>
@@ -105,28 +104,12 @@ export default function FormularioPage() {
             </span>
             <span>{Math.round(progress)}%</span>
           </div>
-          {/* Barra de progreso con el motivo de EKG del logo como relleno */}
-          <div
-            className="relative h-4 w-full overflow-hidden rounded-full bg-muted"
-            role="progressbar"
-            aria-valuenow={Math.round(progress)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Progreso del formulario"
-          >
-            <div
-              className="absolute inset-y-0 left-0 flex items-center overflow-hidden rounded-full bg-primary transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            >
-              <EkgLine className="h-full w-full text-primary-foreground/45" />
-            </div>
-          </div>
-          <ol className="mt-1 flex items-center gap-1.5" aria-hidden="true">
+          <ol className="flex items-center gap-1.5" aria-hidden="true">
             {STEPS.map((s, i) => (
               <li
                 key={s.title}
                 className={cn(
-                  "h-1.5 flex-1 rounded-full transition-colors",
+                  "h-2 flex-1 rounded-full transition-colors",
                   i <= step ? "bg-primary" : "bg-border",
                 )}
               />
