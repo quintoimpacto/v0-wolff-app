@@ -106,8 +106,9 @@ const selectTriggerClass =
   "w-full justify-between rounded-xl border-border px-4 py-3.5 text-[1em] data-[size=default]:h-auto";
 
 // Resaltado de la opción: tinte suave de la marca (nunca el dorado de --accent).
+// `**:text-*` reescribe el color del texto hijo, que la clase base fuerza a blanco al resaltar.
 const selectItemClass =
-  "rounded-lg py-2.5 text-[1em] focus:bg-primary/10 focus:text-foreground data-highlighted:bg-primary/10 data-highlighted:text-foreground data-selected:bg-primary/10 data-selected:text-primary";
+  "rounded-lg py-2.5 text-[1em] text-foreground focus:bg-primary/10 focus:text-foreground focus:**:text-foreground data-selected:bg-primary/10 data-selected:text-primary data-selected:**:text-primary";
 
 interface PersonalDataStepProps {
   value: PersonalData;
