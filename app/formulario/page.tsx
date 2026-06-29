@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { submitPatient } from "@/app/actions/patients";
-import { ConfirmationScreen } from "./confirmation-screen";
 import {
   PersonalDataStep,
   emptyPersonalData,
@@ -64,11 +62,6 @@ export default function FormularioPage() {
   const [medical, setMedical] = useState<MedicalData>(emptyMedicalData);
   const [habits, setHabits] = useState<HabitsData>(emptyHabitsData);
 
-  // Estado del envío final.
-  const [submitState, setSubmitState] = useState<"idle" | "submitting" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [submittedName, setSubmittedName] = useState<string | null>(null);
-
   const isLastStep = step === STEPS.length - 1;
   const progress = ((step + 1) / STEPS.length) * 100;
   const current = STEPS[step];
@@ -100,24 +93,10 @@ export default function FormularioPage() {
     setHabits((prev) => ({ ...prev, ...patch }));
   }
 
-  async function handleSubmit() {
-    setSubmitState("submitting");
-    setErrorMsg("");
-    const result = await submitPatient({ personal, activity, medical, habits });
-    if (result.ok) {
-      // Éxito: pasamos a la pantalla de confirmación, sin posibilidad de editar.
-      setSubmittedName(result.nombre);
-    } else {
-      // Error: conservamos todos los datos cargados e invitamos a reintentar.
-      setErrorMsg(result.error);
-      setSubmitState("error");
-    }
-  }
-
   function goNext() {
-    if (!canContinue || submitState === "submitting") return;
+    if (!canContinue) return;
     if (isLastStep) {
-      void handleSubmit();
+      // Último paso: enviar el formulario (lógica de envío pendiente).
       return;
     }
     setStep((s) => s + 1);
@@ -125,11 +104,6 @@ export default function FormularioPage() {
 
   function goBack() {
     if (step > 0) setStep((s) => s - 1);
-  }
-
-  // Pantalla de confirmación: reemplaza el formulario y no permite volver a editar.
-  if (submittedName !== null) {
-    return <ConfirmationScreen nombre={submittedName} />;
   }
 
   return (
@@ -216,45 +190,16 @@ export default function FormularioPage() {
 
         {/* Navigation */}
         <div className="mt-6 flex flex-col gap-3">
-          {submitState === "error" ? (
-            <div
-              role="alert"
-              className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-left"
-            >
-              <AlertCircle
-                className="mt-0.5 size-5 shrink-0 text-destructive"
-                aria-hidden="true"
-              />
-              <div className="flex flex-col gap-0.5">
-                <p className="text-sm font-medium text-foreground">
-                  No se pudo enviar el formulario
-                </p>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {errorMsg} Tus respuestas siguen guardadas, no perdiste nada.
-                </p>
-              </div>
-            </div>
-          ) : null}
-
           <Button
             size="lg"
             className="h-14 w-full text-base"
             onClick={goNext}
-            disabled={!canContinue || submitState === "submitting"}
+            disabled={!canContinue}
           >
-            {submitState === "submitting" ? (
-              <>
-                <Loader2
-                  className="size-5 animate-spin"
-                  data-icon="inline-start"
-                  aria-hidden="true"
-                />
-                Enviando…
-              </>
-            ) : isLastStep ? (
+            {isLastStep ? (
               <>
                 <Check className="size-5" data-icon="inline-start" aria-hidden="true" />
-                {submitState === "error" ? "Reintentar envío" : "Finalizar"}
+                Finalizar
               </>
             ) : (
               <>
