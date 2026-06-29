@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { CalendarDays, Lock, Users } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
+import { EkgLine } from "@/components/ekg-line";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,15 +44,18 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center px-6 py-12">
+    <main className="flex min-h-dvh flex-1 items-center justify-center bg-secondary px-6 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
-          <WolffLogo width={140} height={101} className="mb-2 w-32" priority />
+          <WolffLogo width={140} height={101} className="w-32" priority />
+          <EkgLine className="my-1 h-5 w-40 text-primary/25" />
           <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Lock className="size-5" aria-hidden="true" />
           </span>
-          <CardTitle className="text-xl">Panel médico</CardTitle>
-          <CardDescription>Ingresá la contraseña para continuar</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">Panel médico</CardTitle>
+          <CardDescription className="text-sm">
+            Ingresá la contraseña para continuar
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -98,7 +102,7 @@ function PanelDashboard() {
   }).format(new Date());
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col bg-secondary">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
           <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
@@ -112,13 +116,17 @@ function PanelDashboard() {
       </header>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold text-foreground">Pacientes de hoy</h1>
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Pacientes de hoy
+          </h1>
           <p className="flex items-center gap-2 text-sm capitalize text-muted-foreground">
             <CalendarDays className="size-4" aria-hidden="true" />
             {today}
           </p>
         </div>
+        {/* Acento de marca: la línea de EKG del logo como divisor sutil */}
+        <EkgLine className="mt-5 h-5 w-full text-primary/20" />
 
         <Card className="mt-8">
           <CardContent className="flex flex-col items-center justify-center gap-3 px-6 py-20 text-center">

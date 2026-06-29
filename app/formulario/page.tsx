@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Minus, Plus } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { EkgLine } from "@/components/ekg-line";
 import { cn } from "@/lib/utils";
 import {
   PersonalDataStep,
@@ -105,7 +105,22 @@ export default function FormularioPage() {
             </span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <Progress value={progress} className="h-2.5" />
+          {/* Barra de progreso con el motivo de EKG del logo como relleno */}
+          <div
+            className="relative h-4 w-full overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progreso del formulario"
+          >
+            <div
+              className="absolute inset-y-0 left-0 flex items-center overflow-hidden rounded-full bg-primary transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            >
+              <EkgLine className="h-full w-full text-primary-foreground/45" />
+            </div>
+          </div>
           <ol className="mt-1 flex items-center gap-1.5" aria-hidden="true">
             {STEPS.map((s, i) => (
               <li
@@ -124,13 +139,13 @@ export default function FormularioPage() {
           className="mt-8 flex flex-1 flex-col"
           style={{ fontSize: `${fontPx}px` }}
         >
-          <p className="text-[0.875em] font-semibold uppercase tracking-wide text-primary">
+          <p className="text-[0.8125em] font-semibold uppercase tracking-[0.12em] text-primary">
             Formulario del paciente
           </p>
-          <h1 className="mt-2 text-balance text-[1.75em] font-semibold leading-tight text-foreground">
+          <h1 className="mt-1.5 text-balance text-[2.125em] font-bold leading-[1.1] tracking-tight text-foreground">
             {current.title}
           </h1>
-          <p className="mt-3 text-pretty text-[1.0625em] leading-relaxed text-muted-foreground">
+          <p className="mt-2 text-pretty text-[0.9375em] leading-relaxed text-muted-foreground">
             {current.description}
           </p>
 

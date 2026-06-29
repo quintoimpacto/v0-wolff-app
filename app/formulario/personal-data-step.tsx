@@ -100,10 +100,10 @@ export function isPersonalDataValid(data: PersonalData): boolean {
 }
 
 const inputClass =
-  "h-auto w-full rounded-xl border border-input bg-background px-3.5 py-3 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+  "h-auto w-full rounded-xl border border-border bg-background px-4 py-3.5 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-input focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25";
 
 const selectTriggerClass =
-  "w-full justify-between rounded-xl px-3.5 py-3 text-[1em] data-[size=default]:h-auto";
+  "w-full justify-between rounded-xl border-border px-4 py-3.5 text-[1em] data-[size=default]:h-auto";
 
 interface PersonalDataStepProps {
   value: PersonalData;
@@ -152,7 +152,7 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
           className={inputClass}
           placeholder="Ej: 12345678"
         />
-        <p className="text-[0.875em] leading-relaxed text-muted-foreground">
+        <p className="text-[0.8125em] leading-relaxed text-muted-foreground">
           Lo usamos para identificarte cuando te llamen a la consulta.
         </p>
       </div>
