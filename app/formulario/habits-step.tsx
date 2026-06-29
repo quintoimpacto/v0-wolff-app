@@ -76,7 +76,7 @@ const inputClass =
   "h-auto w-full rounded-xl border border-border bg-background px-4 py-3.5 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-input focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25";
 
 const selectTriggerClass =
-  "w-full justify-between rounded-xl border-border px-4 py-3.5 text-[1em] data-[size=default]:h-auto";
+  "w-full justify-between rounded-xl border-input px-4 py-3.5 text-[1em] font-medium text-foreground data-[size=default]:h-auto data-placeholder:font-normal data-placeholder:text-muted-foreground [&>svg]:text-foreground/60";
 
 // Resaltado de la opción: fondo de marca SÓLIDO con texto blanco (mismo patrón que paso 1).
 const selectItemClass =
