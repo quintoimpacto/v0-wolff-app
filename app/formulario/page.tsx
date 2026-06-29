@@ -12,6 +12,12 @@ import {
   isPersonalDataValid,
   type PersonalData,
 } from "./personal-data-step";
+import {
+  ActivityStep,
+  emptyActivityData,
+  isActivityDataValid,
+  type ActivityData,
+} from "./activity-step";
 
 const STEPS = [
   {
@@ -40,17 +46,27 @@ export default function FormularioPage() {
   const [step, setStep] = useState(0);
   const [scaleIndex, setScaleIndex] = useState(DEFAULT_SCALE_INDEX);
   const [personal, setPersonal] = useState<PersonalData>(emptyPersonalData);
+  const [activity, setActivity] = useState<ActivityData>(emptyActivityData);
 
   const isLastStep = step === STEPS.length - 1;
   const progress = ((step + 1) / STEPS.length) * 100;
   const current = STEPS[step];
   const fontPx = 16 * SCALES[scaleIndex];
 
-  // El paso 1 exige que los campos obligatorios estén completos antes de continuar.
-  const canContinue = step === 0 ? isPersonalDataValid(personal) : true;
+  // Cada paso exige que sus campos obligatorios estén completos antes de continuar.
+  const canContinue =
+    step === 0
+      ? isPersonalDataValid(personal)
+      : step === 1
+        ? isActivityDataValid(activity)
+        : true;
 
   function updatePersonal(patch: Partial<PersonalData>) {
     setPersonal((prev) => ({ ...prev, ...patch }));
+  }
+
+  function updateActivity(patch: Partial<ActivityData>) {
+    setActivity((prev) => ({ ...prev, ...patch }));
   }
 
   function goNext() {
@@ -134,6 +150,8 @@ export default function FormularioPage() {
 
           {step === 0 ? (
             <PersonalDataStep value={personal} onChange={updatePersonal} />
+          ) : step === 1 ? (
+            <ActivityStep value={activity} onChange={updateActivity} />
           ) : (
             /* Placeholder for upcoming fields */
             <div className="mt-6 flex flex-1 items-center justify-center rounded-xl border border-dashed border-border bg-background/60 p-6 text-center">
