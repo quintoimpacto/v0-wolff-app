@@ -85,6 +85,74 @@ export function formatHora(iso: string): string {
   }).format(new Date(iso));
 }
 
+/** Fecha y hora completa de envío para exportaciones. */
+function formatFechaHora(iso: string): string {
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
+
+/** Columnas fijas del CSV (mismo orden para todos los pacientes). */
+const CSV_COLUMNS: { header: string; get: (p: Paciente) => string }[] = [
+  { header: "Fecha y hora", get: (p) => formatFechaHora(p.created_at) },
+  { header: "Nombre y apellido", get: (p) => text(p.full_name) },
+  { header: "DNI", get: (p) => text(p.dni) },
+  { header: "Edad", get: (p) => (p.edad != null ? String(p.edad) : "—") },
+  {
+    header: "Fecha de nacimiento",
+    get: (p) =>
+      p.birth_date
+        ? new Intl.DateTimeFormat("es-AR").format(new Date(p.birth_date + "T00:00:00"))
+        : "—",
+  },
+  { header: "Sexo", get: (p) => label(SEXO, p.datos.personal?.sexo) },
+  { header: "Peso (kg)", get: (p) => text(p.datos.personal?.weight) },
+  { header: "Altura (cm)", get: (p) => text(p.datos.personal?.height) },
+  { header: "Practica deporte", get: (p) => label(SI_NO, p.datos.activity?.practica) },
+  { header: "Horas por semana", get: (p) => label(HORAS, p.datos.activity?.horasSemana) },
+  { header: "Hace cuánto (deporte)", get: (p) => label(HACE_CUANTO, p.datos.activity?.haceCuanto) },
+  { header: "Edad de inicio (deporte)", get: (p) => text(p.datos.activity?.edadInicio) },
+  { header: "Hipertenso", get: (p) => label(SI_NO, p.datos.medical?.hipertenso) },
+  { header: "Años hipertensión", get: (p) => text(p.datos.medical?.hipertensoAnios) },
+  { header: "Diabético", get: (p) => label(SI_NO, p.datos.medical?.diabetico) },
+  { header: "Años diabetes", get: (p) => text(p.datos.medical?.diabeticoAnios) },
+  { header: "Usa insulina", get: (p) => label(SI_NO, p.datos.medical?.usaInsulina) },
+  { header: "Colesterol alto", get: (p) => label(SI_NO, p.datos.medical?.colesterol) },
+  { header: "Medicación colesterol", get: (p) => label(SI_NO, p.datos.medical?.colesterolMedicacion) },
+  { header: "Último análisis de sangre", get: (p) => text(p.datos.medical?.anioAnalisis) },
+  { header: "Fuma", get: (p) => label(FUMA, p.datos.habits?.fuma) },
+  { header: "Cigarrillos por día", get: (p) => text(p.datos.habits?.cigarrillosDia) },
+  { header: "Edad de inicio (fuma)", get: (p) => text(p.datos.habits?.edadInicioFuma) },
+  { header: "Cigarrillos por día (ex)", get: (p) => text(p.datos.habits?.exCigarrillosDia) },
+  { header: "Edad de inicio (ex)", get: (p) => text(p.datos.habits?.exEdadInicio) },
+  { header: "Hace cuánto que dejó", get: (p) => text(p.datos.habits?.exAniosDejo) },
+  { header: "Años total que fumó", get: (p) => text(p.datos.habits?.exAniosTotal) },
+  { header: "Alimentación", get: (p) => label(ALIMENTACION, p.datos.habits?.alimentacion) },
+  { header: "Desmayos", get: (p) => label(SI_NO, p.datos.habits?.desmayos) },
+  { header: "Dolor de pecho", get: (p) => label(SI_NO, p.datos.habits?.dolorPecho) },
+  { header: "Palpitaciones", get: (p) => label(SI_NO, p.datos.habits?.palpitaciones) },
+];
+
+/** Escapa un valor para CSV (comillas dobles y separadores). */
+function csvEscape(value: string): string {
+  const v = value.replace(/"/g, '""');
+  return `"${v}"`;
+}
+
+/** Genera el contenido CSV de una lista de pacientes. */
+export function pacientesToCsv(pacientes: Paciente[]): string {
+  const header = CSV_COLUMNS.map((c) => csvEscape(c.header)).join(",");
+  const rows = pacientes.map((p) =>
+    CSV_COLUMNS.map((c) => csvEscape(c.get(p))).join(","),
+  );
+  // BOM para que Excel abra los acentos correctamente.
+  return "\uFEFF" + [header, ...rows].join("\r\n");
+}
+
 /** Construye las secciones legibles de la ficha para la vista de detalle. */
 export function buildDetalle(p: Paciente): DetalleSeccion[] {
   const personal = p.datos.personal ?? {};

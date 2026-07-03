@@ -9,6 +9,7 @@ import {
   Check,
   ChevronRight,
   Clock,
+  Download,
   Loader2,
   RefreshCw,
   Users,
@@ -19,6 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   buildDetalle,
   formatHora,
+  pacientesToCsv,
   type Paciente,
 } from "@/lib/pacientes";
 import { marcarAtendido } from "./actions";
@@ -47,6 +49,22 @@ export function PanelDashboard() {
     month: "long",
     year: "numeric",
   }).format(new Date());
+
+  // Descarga la lista actual como archivo CSV (se abre en Excel/Sheets).
+  function handleExport() {
+    if (pacientes.length === 0) return;
+    const csv = pacientesToCsv(pacientes);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const fecha = new Date().toISOString().slice(0, 10);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `pacientes-${fecha}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-secondary">
@@ -90,6 +108,15 @@ export function PanelDashboard() {
                     {pacientes.length} en espera
                   </span>
                 ) : null}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExport}
+                  disabled={pacientes.length === 0}
+                >
+                  <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
+                  Exportar
+                </Button>
                 <button
                   type="button"
                   onClick={() => mutate()}
