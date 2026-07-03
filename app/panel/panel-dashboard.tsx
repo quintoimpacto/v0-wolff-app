@@ -305,11 +305,8 @@ function PatientDetail({
   const [activeTab, setActiveTab] = useState(0);
   const secciones = buildDetalle(paciente);
 
-  // Header: solo datos de identificación rápida (el detalle completo va en la tab).
-  const metaParts = [
-    `DNI ${paciente.dni}`,
-    paciente.edad != null ? `${paciente.edad} años` : null,
-  ].filter(Boolean) as string[];
+  // Header: solo la edad como identificación rápida (el detalle completo va en la tab).
+  const edadLabel = paciente.edad != null ? `${paciente.edad} años` : null;
 
   const activeSeccion = secciones[activeTab] ?? secciones[0];
 
@@ -328,7 +325,9 @@ function PatientDetail({
         <h1 className="text-2xl font-bold tracking-tight text-[#111111]">
           {paciente.full_name}
         </h1>
-        <p className="mt-1 text-sm text-[#6b6b67]">{metaParts.join(" · ")}</p>
+        {edadLabel ? (
+          <p className="mt-1 text-[16px] font-medium text-[#111111]">{edadLabel}</p>
+        ) : null}
       </div>
 
       {/* Tabs */}
