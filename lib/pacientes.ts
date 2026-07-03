@@ -26,6 +26,10 @@ export interface Paciente {
 export interface DetalleItem {
   label: string;
   value: string;
+  /** Campo de factor de riesgo: muestra badge resaltado cuando el valor es "Sí". */
+  risk?: boolean;
+  /** Síntoma cardiovascular (se agrupan aparte en la tab de hábitos). */
+  sintoma?: boolean;
 }
 
 export interface DetalleSeccion {
@@ -194,19 +198,19 @@ export function buildDetalle(p: Paciente): DetalleSeccion[] {
 
   // Antecedentes médicos
   const medicalItems: DetalleItem[] = [
-    { label: "Hipertenso", value: label(SI_NO, medical.hipertenso) },
+    { label: "Hipertenso", value: label(SI_NO, medical.hipertenso), risk: true },
   ];
   if (medical.hipertenso === "si") {
     medicalItems.push({ label: "Hace cuántos años (hipertensión)", value: text(medical.hipertensoAnios) });
   }
-  medicalItems.push({ label: "Diabético", value: label(SI_NO, medical.diabetico) });
+  medicalItems.push({ label: "Diabético", value: label(SI_NO, medical.diabetico), risk: true });
   if (medical.diabetico === "si") {
     medicalItems.push(
       { label: "Hace cuántos años (diabetes)", value: text(medical.diabeticoAnios) },
-      { label: "Usa insulina", value: label(SI_NO, medical.usaInsulina) },
+      { label: "Usa insulina", value: label(SI_NO, medical.usaInsulina), risk: true },
     );
   }
-  medicalItems.push({ label: "Colesterol alto", value: label(SI_NO, medical.colesterol) });
+  medicalItems.push({ label: "Colesterol alto", value: label(SI_NO, medical.colesterol), risk: true });
   if (medical.colesterol === "si") {
     medicalItems.push({ label: "Medicación para colesterol", value: label(SI_NO, medical.colesterolMedicacion) });
   }
@@ -215,7 +219,7 @@ export function buildDetalle(p: Paciente): DetalleSeccion[] {
 
   // Hábitos y síntomas
   const habitsItems: DetalleItem[] = [
-    { label: "Fuma", value: label(FUMA, habits.fuma) },
+    { label: "Fuma", value: label(FUMA, habits.fuma), risk: true },
   ];
   if (habits.fuma === "si") {
     habitsItems.push(
@@ -233,9 +237,9 @@ export function buildDetalle(p: Paciente): DetalleSeccion[] {
   }
   habitsItems.push(
     { label: "Alimentación", value: label(ALIMENTACION, habits.alimentacion) },
-    { label: "Desmayos", value: label(SI_NO, habits.desmayos) },
-    { label: "Dolor de pecho", value: label(SI_NO, habits.dolorPecho) },
-    { label: "Palpitaciones", value: label(SI_NO, habits.palpitaciones) },
+    { label: "Desmayos", value: label(SI_NO, habits.desmayos), risk: true, sintoma: true },
+    { label: "Dolor de pecho", value: label(SI_NO, habits.dolorPecho), risk: true, sintoma: true },
+    { label: "Palpitaciones", value: label(SI_NO, habits.palpitaciones), risk: true, sintoma: true },
   );
   secciones.push({ title: "Hábitos y síntomas", items: habitsItems });
 

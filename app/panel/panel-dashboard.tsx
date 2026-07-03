@@ -4,16 +4,21 @@ import { useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import {
+  Activity,
   ArrowLeft,
   CalendarDays,
   Check,
   ChevronRight,
+  ClipboardList,
   Clock,
   Download,
+  Heart,
   Loader2,
   RefreshCw,
+  User,
   Users,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +30,14 @@ import {
 } from "@/lib/pacientes";
 import { marcarAtendido } from "./actions";
 
+// Ícono de cada tab según el título de la sección.
+const TAB_ICONS: Record<string, LucideIcon> = {
+  "Datos personales": User,
+  "Actividad física": Activity,
+  "Antecedentes médicos": ClipboardList,
+  "Hábitos y síntomas": Heart,
+};
+
 const fetcher = async (url: string): Promise<{ pacientes: Paciente[] }> => {
   const res = await fetch(url);
   if (!res.ok) throw new Error("No se pudo obtener la lista.");
@@ -33,6 +46,8 @@ const fetcher = async (url: string): Promise<{ pacientes: Paciente[] }> => {
 
 export function PanelDashboard() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [archiving, setArchiving] = useState(false);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
 
   // SWR refresca la lista cada 30s automáticamente (y al recuperar foco).
   const { data, error, isLoading, mutate } = useSWR("/api/pacientes", fetcher, {
@@ -50,17 +65,86 @@ export function PanelDashboard() {
     year: "numeric",
   }).format(new Date());
 
+  // Exporta los datos del paciente seleccionado como CSV (se abre en Excel/Sheets).
+  function handleExport(paciente: Paciente) {
+    const csv = pacientesToCsv([paciente]);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const slug = paciente.full_name
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `paciente-${slug || paciente.dni}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleArchive(paciente: Paciente) {
+    setArchiveError(null);
+    setArchiving(true);
+    const result = await marcarAtendido(paciente.id);
+    if (result.ok) {
+      setSelectedId(null);
+      await mutate();
+      setArchiving(false);
+    } else {
+      setArchiving(false);
+      setArchiveError(result.error);
+    }
+  }
+
   return (
-    <div className="flex min-h-dvh flex-col bg-secondary">
+    <div className="flex min-h-dvh flex-col bg-[#ffffff]">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
           <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
-          <Button
-            variant="outline"
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/">Salir</Link>}
-          />
+          <div className="flex items-center gap-3">
+            {selected ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExport(selected)}
+                  disabled={archiving}
+                >
+                  <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
+                  Exportar
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleArchive(selected)}
+                  disabled={archiving}
+                  className="bg-[#a0455d] text-white hover:bg-[#8c3b50]"
+                >
+                  {archiving ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
+                      Archivando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="size-4" data-icon="inline-start" aria-hidden="true" />
+                      Marcar como atendido
+                    </>
+                  )}
+                </Button>
+              </>
+            ) : null}
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              className="border-[#e8e6e1] text-[#333333] hover:bg-[#f0f0ee] hover:text-[#333333]"
+              render={<Link href="/">Salir</Link>}
+            />
+          </div>
         </div>
       </header>
 
@@ -69,10 +153,7 @@ export function PanelDashboard() {
           <PatientDetail
             paciente={selected}
             onBack={() => setSelectedId(null)}
-            onArchived={async () => {
-              setSelectedId(null);
-              await mutate();
-            }}
+            error={archiveError}
           />
         ) : (
           <>
@@ -88,7 +169,7 @@ export function PanelDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 {pacientes.length > 0 ? (
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+                  <span className="rounded-full bg-[#f0f0ee] px-3 py-1 text-sm font-semibold text-[#333333]">
                     {pacientes.length} en espera
                   </span>
                 ) : null}
@@ -189,23 +270,23 @@ function PatientList({
           <button
             type="button"
             onClick={() => onSelect(p.id)}
-            className="flex w-full items-center gap-4 rounded-xl border border-border bg-background p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted/50"
+            className="flex w-full items-center gap-4 rounded-lg border-[0.5px] border-[#e8e6e1] bg-[#ffffff] p-4 text-left transition-colors hover:border-[#cccccc]"
           >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#ececea] text-sm font-bold text-[#5a5a56]">
               {initials(p.full_name)}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold text-foreground">{p.full_name}</p>
-              <p className="truncate text-sm text-muted-foreground">
+              <p className="truncate font-semibold text-[#111111]">{p.full_name}</p>
+              <p className="truncate text-sm text-[#6b6b67]">
                 DNI {p.dni}
                 {p.edad != null ? ` · ${p.edad} años` : ""}
               </p>
             </div>
-            <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+            <span className="flex items-center gap-1.5 text-sm font-medium text-[#9b9b96]">
               <Clock className="size-4" aria-hidden="true" />
               {formatHora(p.created_at)}
             </span>
-            <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <ChevronRight className="size-5 shrink-0 text-[#9b9b96]" aria-hidden="true" />
           </button>
         </li>
       ))}
@@ -216,131 +297,113 @@ function PatientList({
 function PatientDetail({
   paciente,
   onBack,
-  onArchived,
+  error,
 }: {
   paciente: Paciente;
   onBack: () => void;
-  onArchived: () => Promise<void>;
+  error: string | null;
 }) {
-  const [archiving, setArchiving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
   const secciones = buildDetalle(paciente);
 
-  // Exporta los datos de este paciente como archivo CSV (se abre en Excel/Sheets).
-  function handleExport() {
-    const csv = pacientesToCsv([paciente]);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const slug = paciente.full_name
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `paciente-${slug || paciente.dni}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
+  // Header: solo la edad como identificación rápida (el detalle completo va en la tab).
+  const edadLabel = paciente.edad != null ? `${paciente.edad} años` : null;
 
-  async function handleArchive() {
-    setError(null);
-    setArchiving(true);
-    const result = await marcarAtendido(paciente.id);
-    if (result.ok) {
-      await onArchived();
-    } else {
-      setArchiving(false);
-      setError(result.error);
-    }
-  }
+  const activeSeccion = secciones[activeTab] ?? secciones[0];
 
   return (
-    <div className="flex flex-col gap-6">
-      <button
-        type="button"
-        onClick={onBack}
-        className="flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+    <div className="flex h-[calc(100dvh-10rem)] flex-col overflow-hidden rounded-xl border border-[#eceef1] bg-white text-[#1f2228]">
+      {/* Header del paciente */}
+      <div className="shrink-0 border-b border-[#eceef1] px-6 pb-5 pt-5">
+        <button
+          type="button"
+          onClick={onBack}
+          className="mb-4 flex w-fit items-center gap-2 text-sm font-medium text-[#6b6b67] transition-colors hover:text-[#111111]"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Volver a la lista
+        </button>
+        <h1 className="text-2xl font-bold tracking-tight text-[#111111]">
+          {paciente.full_name}
+        </h1>
+        {edadLabel ? (
+          <p className="mt-1 text-[16px] font-medium text-[#111111]">{edadLabel}</p>
+        ) : null}
+      </div>
+
+      {/* Tabs */}
+      <div
+        role="tablist"
+        aria-label="Secciones de la ficha"
+        className="flex shrink-0 gap-1 overflow-x-auto border-b border-[#eceef1] px-4"
       >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Volver a la lista
-      </button>
-
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-            {initials(paciente.full_name)}
-          </span>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {paciente.full_name}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              DNI {paciente.dni}
-              {paciente.edad != null ? ` · ${paciente.edad} años` : ""} · Enviado a las{" "}
-              {formatHora(paciente.created_at)}
-            </p>
-          </div>
-        </div>
+        {secciones.map((seccion, index) => {
+          const active = index === activeTab;
+          const Icon = TAB_ICONS[seccion.title];
+          return (
+            <button
+              key={seccion.title}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setActiveTab(index)}
+              className={
+                "flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors " +
+                (active
+                  ? "border-[#a0455d] text-[#a0455d]"
+                  : "border-transparent text-[#6b6b67] hover:text-[#111111]")
+              }
+            >
+              {Icon ? <Icon size={15} aria-hidden="true" /> : null}
+              {seccion.title}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {secciones.map((seccion) => (
-          <Card key={seccion.title}>
-            <CardContent className="flex flex-col gap-3 p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
-                {seccion.title}
-              </h2>
-              <dl className="flex flex-col gap-2.5">
-                {seccion.items.map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-start justify-between gap-4 border-b border-border/60 pb-2.5 last:border-0 last:pb-0"
-                  >
-                    <dt className="text-sm text-muted-foreground">{item.label}</dt>
-                    <dd className="text-right text-sm font-medium text-foreground">
-                      {item.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Contenido de la tab activa (crece para llenar el espacio, sin scroll propio) */}
+      <div className="flex-1 px-6 py-4">
+        <dl className="flex flex-col">
+          {activeSeccion.items.map((item, index) => {
+            const firstSintoma =
+              item.sintoma &&
+              activeSeccion.items.findIndex((i) => i.sintoma) === index;
+            const positiveRisk = item.risk && item.value === "Sí";
+            return (
+              <div key={item.label}>
+                {firstSintoma ? (
+                  <p className="pb-1.5 pt-4 text-xs font-semibold uppercase tracking-wide text-[#9b9b96]">
+                    Síntomas
+                  </p>
+                ) : null}
+                <div className="flex items-center justify-between gap-4 border-b border-[#f0f1f4] py-3">
+                  <dt className="text-sm text-[#6b6b67]">{item.label}</dt>
+                  <dd className="text-right">
+                    {positiveRisk ? (
+                      <span className="inline-flex items-center rounded-full bg-[#f0f0ee] px-2.5 py-0.5 text-xs font-semibold text-[#333333]">
+                        {item.value}
+                      </span>
+                    ) : (
+                      <span className="text-sm font-medium text-[#111111]">
+                        {item.value}
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              </div>
+            );
+          })}
+        </dl>
       </div>
 
+      {/* Error de archivado (si ocurre) */}
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
+        <div className="shrink-0 border-t border-[#eceef1] bg-white px-6 py-3">
+          <p className="text-sm text-destructive" role="alert">
+            {error}
+          </p>
+        </div>
       ) : null}
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button variant="outline" onClick={onBack} disabled={archiving}>
-          Volver
-        </Button>
-        <Button variant="outline" onClick={handleExport} disabled={archiving}>
-          <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
-          Exportar
-        </Button>
-        <Button onClick={handleArchive} disabled={archiving}>
-          {archiving ? (
-            <>
-              <Loader2 className="size-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
-              Archivando...
-            </>
-          ) : (
-            <>
-              <Check className="size-4" data-icon="inline-start" aria-hidden="true" />
-              Marcar como atendido
-            </>
-          )}
-        </Button>
-      </div>
     </div>
   );
 }
