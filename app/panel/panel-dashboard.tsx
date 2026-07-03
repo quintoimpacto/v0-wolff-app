@@ -273,18 +273,10 @@ function PatientDetail({
     }
   }
 
-  // Datos esenciales para la línea compacta del header.
-  const personalItems =
-    secciones.find((s) => s.title === "Datos personales")?.items ?? [];
-  const getVal = (labelText: string) =>
-    personalItems.find((i) => i.label === labelText)?.value ?? "—";
+  // Header: solo datos de identificación rápida (el detalle completo va en la tab).
   const metaParts = [
     `DNI ${paciente.dni}`,
     paciente.edad != null ? `${paciente.edad} años` : null,
-    getVal("Sexo") !== "—" ? getVal("Sexo") : null,
-    getVal("Peso") !== "—" ? getVal("Peso") : null,
-    getVal("Altura") !== "—" ? getVal("Altura") : null,
-    formatHora(paciente.created_at),
   ].filter(Boolean) as string[];
 
   const activeSeccion = secciones[activeTab] ?? secciones[0];
@@ -337,8 +329,8 @@ function PatientDetail({
         })}
       </div>
 
-      {/* Contenido de la tab activa */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+      {/* Contenido de la tab activa (crece para llenar el espacio, sin scroll propio) */}
+      <div className="flex-1 px-6 py-4">
         <dl className="flex flex-col">
           {activeSeccion.items.map((item, index) => {
             const firstSintoma =
