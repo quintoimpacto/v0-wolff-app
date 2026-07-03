@@ -50,22 +50,6 @@ export function PanelDashboard() {
     year: "numeric",
   }).format(new Date());
 
-  // Descarga la lista actual como archivo CSV (se abre en Excel/Sheets).
-  function handleExport() {
-    if (pacientes.length === 0) return;
-    const csv = pacientesToCsv(pacientes);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const fecha = new Date().toISOString().slice(0, 10);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `pacientes-${fecha}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-
   return (
     <div className="flex min-h-dvh flex-col bg-secondary">
       <header className="border-b border-border bg-background">
@@ -108,15 +92,6 @@ export function PanelDashboard() {
                     {pacientes.length} en espera
                   </span>
                 ) : null}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExport}
-                  disabled={pacientes.length === 0}
-                >
-                  <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
-                  Exportar
-                </Button>
                 <button
                   type="button"
                   onClick={() => mutate()}
@@ -251,6 +226,27 @@ function PatientDetail({
   const [error, setError] = useState<string | null>(null);
   const secciones = buildDetalle(paciente);
 
+  // Exporta los datos de este paciente como archivo CSV (se abre en Excel/Sheets).
+  function handleExport() {
+    const csv = pacientesToCsv([paciente]);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const slug = paciente.full_name
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `paciente-${slug || paciente.dni}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   async function handleArchive() {
     setError(null);
     setArchiving(true);
@@ -326,6 +322,10 @@ function PatientDetail({
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
         <Button variant="outline" onClick={onBack} disabled={archiving}>
           Volver
+        </Button>
+        <Button variant="outline" onClick={handleExport} disabled={archiving}>
+          <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
+          Exportar
         </Button>
         <Button onClick={handleArchive} disabled={archiving}>
           {archiving ? (
