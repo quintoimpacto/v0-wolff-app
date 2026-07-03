@@ -224,6 +224,7 @@ function PatientDetail({
 }) {
   const [archiving, setArchiving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
   const secciones = buildDetalle(paciente);
 
   // Exporta los datos de este paciente como archivo CSV (se abre en Excel/Sheets).
@@ -259,87 +260,133 @@ function PatientDetail({
     }
   }
 
+  // Datos esenciales para la línea compacta del header.
+  const personalItems =
+    secciones.find((s) => s.title === "Datos personales")?.items ?? [];
+  const getVal = (labelText: string) =>
+    personalItems.find((i) => i.label === labelText)?.value ?? "—";
+  const metaParts = [
+    `DNI ${paciente.dni}`,
+    paciente.edad != null ? `${paciente.edad} años` : null,
+    getVal("Sexo") !== "—" ? getVal("Sexo") : null,
+    getVal("Peso") !== "—" ? getVal("Peso") : null,
+    getVal("Altura") !== "—" ? getVal("Altura") : null,
+    formatHora(paciente.created_at),
+  ].filter(Boolean) as string[];
+
+  const activeSeccion = secciones[activeTab] ?? secciones[0];
+
   return (
-    <div className="flex flex-col gap-6">
-      <button
-        type="button"
-        onClick={onBack}
-        className="flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+    <div className="flex min-h-[calc(100dvh-9rem)] flex-col rounded-xl border border-[#eceef1] bg-white text-[#1f2228]">
+      {/* Header del paciente */}
+      <div className="border-b border-[#eceef1] px-6 pb-5 pt-5">
+        <button
+          type="button"
+          onClick={onBack}
+          className="mb-4 flex w-fit items-center gap-2 text-sm font-medium text-[#737680] transition-colors hover:text-[#1f2228]"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Volver a la lista
+        </button>
+        <h1 className="text-2xl font-bold tracking-tight text-[#1f2228]">
+          {paciente.full_name}
+        </h1>
+        <p className="mt-1 text-sm text-[#737680]">{metaParts.join(" · ")}</p>
+      </div>
+
+      {/* Tabs */}
+      <div
+        role="tablist"
+        aria-label="Secciones de la ficha"
+        className="flex gap-1 overflow-x-auto border-b border-[#eceef1] px-4"
       >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Volver a la lista
-      </button>
+        {secciones.map((seccion, index) => {
+          const active = index === activeTab;
+          return (
+            <button
+              key={seccion.title}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setActiveTab(index)}
+              className={
+                "shrink-0 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors " +
+                (active
+                  ? "border-[#a0455d] text-[#a0455d]"
+                  : "border-transparent text-[#737680] hover:text-[#1f2228]")
+              }
+            >
+              {seccion.title}
+            </button>
+          );
+        })}
+      </div>
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-            {initials(paciente.full_name)}
-          </span>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {paciente.full_name}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              DNI {paciente.dni}
-              {paciente.edad != null ? ` · ${paciente.edad} años` : ""} · Enviado a las{" "}
-              {formatHora(paciente.created_at)}
-            </p>
-          </div>
+      {/* Contenido de la tab activa */}
+      <div className="flex-1 overflow-y-auto px-6 py-4">
+        <dl className="flex flex-col">
+          {activeSeccion.items.map((item, index) => {
+            const firstSintoma =
+              item.sintoma &&
+              activeSeccion.items.findIndex((i) => i.sintoma) === index;
+            const positiveRisk = item.risk && item.value === "Sí";
+            return (
+              <div key={item.label}>
+                {firstSintoma ? (
+                  <p className="pb-1.5 pt-4 text-xs font-semibold uppercase tracking-wide text-[#a3a6ae]">
+                    Síntomas
+                  </p>
+                ) : null}
+                <div className="flex items-center justify-between gap-4 border-b border-[#f0f1f4] py-3">
+                  <dt className="text-sm text-[#737680]">{item.label}</dt>
+                  <dd className="text-right">
+                    {positiveRisk ? (
+                      <span className="inline-flex items-center rounded-full bg-[#f5e0e5] px-2.5 py-0.5 text-xs font-semibold text-[#7a2d42]">
+                        {item.value}
+                      </span>
+                    ) : (
+                      <span className="text-sm font-semibold text-[#1f2228]">
+                        {item.value}
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              </div>
+            );
+          })}
+        </dl>
+      </div>
+
+      {/* Barra de acciones fija */}
+      <div className="sticky bottom-0 flex flex-col gap-2 border-t border-[#eceef1] bg-white px-6 py-4">
+        {error ? (
+          <p className="text-sm text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <Button variant="outline" onClick={handleExport} disabled={archiving}>
+            <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
+            Exportar
+          </Button>
+          <Button
+            onClick={handleArchive}
+            disabled={archiving}
+            className="bg-[#a0455d] text-white hover:bg-[#8c3b50]"
+          >
+            {archiving ? (
+              <>
+                <Loader2 className="size-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
+                Archivando...
+              </>
+            ) : (
+              <>
+                <Check className="size-4" data-icon="inline-start" aria-hidden="true" />
+                Marcar como atendido
+              </>
+            )}
+          </Button>
         </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        {secciones.map((seccion) => (
-          <Card key={seccion.title}>
-            <CardContent className="flex flex-col gap-3 p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
-                {seccion.title}
-              </h2>
-              <dl className="flex flex-col gap-2.5">
-                {seccion.items.map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-start justify-between gap-4 border-b border-border/60 pb-2.5 last:border-0 last:pb-0"
-                  >
-                    <dt className="text-sm text-muted-foreground">{item.label}</dt>
-                    <dd className="text-right text-sm font-medium text-foreground">
-                      {item.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button variant="outline" onClick={onBack} disabled={archiving}>
-          Volver
-        </Button>
-        <Button variant="outline" onClick={handleExport} disabled={archiving}>
-          <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
-          Exportar
-        </Button>
-        <Button onClick={handleArchive} disabled={archiving}>
-          {archiving ? (
-            <>
-              <Loader2 className="size-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
-              Archivando...
-            </>
-          ) : (
-            <>
-              <Check className="size-4" data-icon="inline-start" aria-hidden="true" />
-              Marcar como atendido
-            </>
-          )}
-        </Button>
       </div>
     </div>
   );
