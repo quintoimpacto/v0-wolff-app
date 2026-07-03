@@ -101,7 +101,7 @@ export function PanelDashboard() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-secondary">
+    <div className="flex min-h-dvh flex-col bg-[#ffffff]">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
           <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
@@ -141,6 +141,7 @@ export function PanelDashboard() {
               variant="outline"
               size="sm"
               nativeButton={false}
+              className="border-[#e8e6e1] text-[#333333] hover:bg-[#f0f0ee] hover:text-[#333333]"
               render={<Link href="/">Salir</Link>}
             />
           </div>
@@ -168,7 +169,7 @@ export function PanelDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 {pacientes.length > 0 ? (
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+                  <span className="rounded-full bg-[#f0f0ee] px-3 py-1 text-sm font-semibold text-[#333333]">
                     {pacientes.length} en espera
                   </span>
                 ) : null}
@@ -269,23 +270,23 @@ function PatientList({
           <button
             type="button"
             onClick={() => onSelect(p.id)}
-            className="flex w-full items-center gap-4 rounded-xl border border-border bg-background p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted/50"
+            className="flex w-full items-center gap-4 rounded-lg border-[0.5px] border-[#e8e6e1] bg-[#ffffff] p-4 text-left transition-colors hover:border-[#cccccc]"
           >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#ececea] text-sm font-bold text-[#5a5a56]">
               {initials(p.full_name)}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold text-foreground">{p.full_name}</p>
-              <p className="truncate text-sm text-muted-foreground">
+              <p className="truncate font-semibold text-[#111111]">{p.full_name}</p>
+              <p className="truncate text-sm text-[#6b6b67]">
                 DNI {p.dni}
                 {p.edad != null ? ` · ${p.edad} años` : ""}
               </p>
             </div>
-            <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+            <span className="flex items-center gap-1.5 text-sm font-medium text-[#9b9b96]">
               <Clock className="size-4" aria-hidden="true" />
               {formatHora(p.created_at)}
             </span>
-            <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <ChevronRight className="size-5 shrink-0 text-[#9b9b96]" aria-hidden="true" />
           </button>
         </li>
       ))}
