@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, AlertCircle } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { guardarPaciente } from "./actions";
 import {
   PersonalDataStep,
   emptyPersonalData,
   isPersonalDataValid,
+  calculateAge,
   type PersonalData,
 } from "./personal-data-step";
 import {
@@ -61,6 +63,10 @@ export default function FormularioPage() {
   const [activity, setActivity] = useState<ActivityData>(emptyActivityData);
   const [medical, setMedical] = useState<MedicalData>(emptyMedicalData);
   const [habits, setHabits] = useState<HabitsData>(emptyHabitsData);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  // Cuando el guardado es exitoso guardamos el nombre para la pantalla final.
+  const [submittedName, setSubmittedName] = useState<string | null>(null);
 
   // Al cambiar de paso, subimos la pantalla para mostrar siempre la primera pregunta.
   useEffect(() => {
@@ -98,10 +104,44 @@ export default function FormularioPage() {
     setHabits((prev) => ({ ...prev, ...patch }));
   }
 
+  async function handleSubmit() {
+    setSubmitError(null);
+    setSubmitting(true);
+
+    // Fecha de nacimiento en ISO (YYYY-MM-DD) y edad calculada.
+    const pad = (v: string) => v.padStart(2, "0");
+    const birthDate =
+      personal.day && personal.month && personal.year
+        ? `${personal.year}-${pad(personal.month)}-${pad(personal.day)}`
+        : null;
+    const edad = calculateAge(personal.day, personal.month, personal.year);
+
+    const result = await guardarPaciente({
+      fullName: personal.fullName,
+      dni: personal.dni,
+      birthDate,
+      edad,
+      datos: {
+        personal: { ...personal },
+        activity: { ...activity },
+        medical: { ...medical },
+        habits: { ...habits },
+      },
+    });
+
+    setSubmitting(false);
+
+    if (result.ok) {
+      setSubmittedName(personal.fullName.trim());
+    } else {
+      setSubmitError(result.error);
+    }
+  }
+
   function goNext() {
-    if (!canContinue) return;
+    if (!canContinue || submitting) return;
     if (isLastStep) {
-      // Último paso: enviar el formulario (lógica de envío pendiente).
+      void handleSubmit();
       return;
     }
     setStep((s) => s + 1);
@@ -109,6 +149,38 @@ export default function FormularioPage() {
 
   function goBack() {
     if (step > 0) setStep((s) => s - 1);
+  }
+
+  // Pantalla de confirmación: el formulario ya no se puede editar.
+  if (submittedName) {
+    return (
+      <div className="flex min-h-dvh flex-col bg-secondary">
+        <header className="sticky top-0 z-10 border-b border-border bg-background">
+          <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
+            <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+          </div>
+        </header>
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-10 text-center">
+          <span className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Check className="size-10" aria-hidden="true" />
+          </span>
+          <h1 className="mt-6 text-balance text-3xl font-bold leading-tight tracking-tight text-foreground">
+            ¡Listo! El médico ya tiene tu información.
+          </h1>
+          <p className="mt-3 text-pretty text-base leading-relaxed text-muted-foreground">
+            Gracias, <span className="font-semibold text-foreground">{submittedName}</span>. Ya podés
+            esperar a que te llamen a la consulta.
+          </p>
+          <Button
+            variant="outline"
+            size="lg"
+            nativeButton={false}
+            className="mt-8 h-12 w-full max-w-xs text-base"
+            render={<Link href="/">Volver al inicio</Link>}
+          />
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -195,17 +267,46 @@ export default function FormularioPage() {
 
         {/* Navigation */}
         <div className="mt-6 flex flex-col gap-3">
+          {submitError ? (
+            <div
+              role="alert"
+              className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-left"
+            >
+              <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden="true" />
+              <div className="flex flex-col gap-0.5">
+                <p className="text-sm font-semibold text-foreground">
+                  No pudimos guardar tus datos
+                </p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {submitError} Tus respuestas siguen guardadas: tocá &quot;Reintentar&quot; para
+                  volver a enviarlas.
+                </p>
+              </div>
+            </div>
+          ) : null}
           <Button
             size="lg"
             className="h-14 w-full text-base"
             onClick={goNext}
-            disabled={!canContinue}
+            disabled={!canContinue || submitting}
           >
             {isLastStep ? (
-              <>
-                <Check className="size-5" data-icon="inline-start" aria-hidden="true" />
-                Finalizar
-              </>
+              submitting ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" data-icon="inline-start" aria-hidden="true" />
+                  Guardando...
+                </>
+              ) : submitError ? (
+                <>
+                  <Check className="size-5" data-icon="inline-start" aria-hidden="true" />
+                  Reintentar
+                </>
+              ) : (
+                <>
+                  <Check className="size-5" data-icon="inline-start" aria-hidden="true" />
+                  Finalizar
+                </>
+              )
             ) : (
               <>
                 Continuar
