@@ -4,16 +4,21 @@ import { useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import {
+  Activity,
   ArrowLeft,
   CalendarDays,
   Check,
   ChevronRight,
+  ClipboardList,
   Clock,
   Download,
+  Heart,
   Loader2,
   RefreshCw,
+  User,
   Users,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +29,14 @@ import {
   type Paciente,
 } from "@/lib/pacientes";
 import { marcarAtendido } from "./actions";
+
+// Ícono de cada tab según el título de la sección.
+const TAB_ICONS: Record<string, LucideIcon> = {
+  "Datos personales": User,
+  "Actividad física": Activity,
+  "Antecedentes médicos": ClipboardList,
+  "Hábitos y síntomas": Heart,
+};
 
 const fetcher = async (url: string): Promise<{ pacientes: Paciente[] }> => {
   const res = await fetch(url);
@@ -277,31 +290,32 @@ function PatientDetail({
   const activeSeccion = secciones[activeTab] ?? secciones[0];
 
   return (
-    <div className="flex min-h-[calc(100dvh-9rem)] flex-col rounded-xl border border-[#eceef1] bg-white text-[#1f2228]">
+    <div className="flex h-[calc(100dvh-10rem)] flex-col overflow-hidden rounded-xl border border-[#eceef1] bg-white text-[#1f2228]">
       {/* Header del paciente */}
-      <div className="border-b border-[#eceef1] px-6 pb-5 pt-5">
+      <div className="shrink-0 border-b border-[#eceef1] px-6 pb-5 pt-5">
         <button
           type="button"
           onClick={onBack}
-          className="mb-4 flex w-fit items-center gap-2 text-sm font-medium text-[#737680] transition-colors hover:text-[#1f2228]"
+          className="mb-4 flex w-fit items-center gap-2 text-sm font-medium text-[#6b6b67] transition-colors hover:text-[#111111]"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           Volver a la lista
         </button>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1f2228]">
+        <h1 className="text-2xl font-bold tracking-tight text-[#111111]">
           {paciente.full_name}
         </h1>
-        <p className="mt-1 text-sm text-[#737680]">{metaParts.join(" · ")}</p>
+        <p className="mt-1 text-sm text-[#6b6b67]">{metaParts.join(" · ")}</p>
       </div>
 
       {/* Tabs */}
       <div
         role="tablist"
         aria-label="Secciones de la ficha"
-        className="flex gap-1 overflow-x-auto border-b border-[#eceef1] px-4"
+        className="flex shrink-0 gap-1 overflow-x-auto border-b border-[#eceef1] px-4"
       >
         {secciones.map((seccion, index) => {
           const active = index === activeTab;
+          const Icon = TAB_ICONS[seccion.title];
           return (
             <button
               key={seccion.title}
@@ -310,12 +324,13 @@ function PatientDetail({
               aria-selected={active}
               onClick={() => setActiveTab(index)}
               className={
-                "shrink-0 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors " +
+                "flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors " +
                 (active
                   ? "border-[#a0455d] text-[#a0455d]"
-                  : "border-transparent text-[#737680] hover:text-[#1f2228]")
+                  : "border-transparent text-[#6b6b67] hover:text-[#111111]")
               }
             >
+              {Icon ? <Icon size={15} aria-hidden="true" /> : null}
               {seccion.title}
             </button>
           );
@@ -323,7 +338,7 @@ function PatientDetail({
       </div>
 
       {/* Contenido de la tab activa */}
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
         <dl className="flex flex-col">
           {activeSeccion.items.map((item, index) => {
             const firstSintoma =
@@ -333,19 +348,19 @@ function PatientDetail({
             return (
               <div key={item.label}>
                 {firstSintoma ? (
-                  <p className="pb-1.5 pt-4 text-xs font-semibold uppercase tracking-wide text-[#a3a6ae]">
+                  <p className="pb-1.5 pt-4 text-xs font-semibold uppercase tracking-wide text-[#9b9b96]">
                     Síntomas
                   </p>
                 ) : null}
                 <div className="flex items-center justify-between gap-4 border-b border-[#f0f1f4] py-3">
-                  <dt className="text-sm text-[#737680]">{item.label}</dt>
+                  <dt className="text-sm text-[#6b6b67]">{item.label}</dt>
                   <dd className="text-right">
                     {positiveRisk ? (
-                      <span className="inline-flex items-center rounded-full bg-[#f5e0e5] px-2.5 py-0.5 text-xs font-semibold text-[#7a2d42]">
+                      <span className="inline-flex items-center rounded-full bg-[#f0f0ee] px-2.5 py-0.5 text-xs font-semibold text-[#333333]">
                         {item.value}
                       </span>
                     ) : (
-                      <span className="text-sm font-semibold text-[#1f2228]">
+                      <span className="text-sm font-medium text-[#111111]">
                         {item.value}
                       </span>
                     )}
@@ -358,7 +373,7 @@ function PatientDetail({
       </div>
 
       {/* Barra de acciones fija */}
-      <div className="sticky bottom-0 flex flex-col gap-2 border-t border-[#eceef1] bg-white px-6 py-4">
+      <div className="shrink-0 flex flex-col gap-2 border-t border-[#eceef1] bg-white px-6 py-4">
         {error ? (
           <p className="text-sm text-destructive" role="alert">
             {error}
