@@ -46,6 +46,8 @@ const fetcher = async (url: string): Promise<{ pacientes: Paciente[] }> => {
 
 export function PanelDashboard() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [archiving, setArchiving] = useState(false);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
 
   // SWR refresca la lista cada 30s automáticamente (y al recuperar foco).
   const { data, error, isLoading, mutate } = useSWR("/api/pacientes", fetcher, {
@@ -63,17 +65,85 @@ export function PanelDashboard() {
     year: "numeric",
   }).format(new Date());
 
+  // Exporta los datos del paciente seleccionado como CSV (se abre en Excel/Sheets).
+  function handleExport(paciente: Paciente) {
+    const csv = pacientesToCsv([paciente]);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const slug = paciente.full_name
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `paciente-${slug || paciente.dni}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleArchive(paciente: Paciente) {
+    setArchiveError(null);
+    setArchiving(true);
+    const result = await marcarAtendido(paciente.id);
+    if (result.ok) {
+      setSelectedId(null);
+      await mutate();
+      setArchiving(false);
+    } else {
+      setArchiving(false);
+      setArchiveError(result.error);
+    }
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-secondary">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
           <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
-          <Button
-            variant="outline"
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/">Salir</Link>}
-          />
+          <div className="flex items-center gap-3">
+            {selected ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExport(selected)}
+                  disabled={archiving}
+                >
+                  <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
+                  Exportar
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleArchive(selected)}
+                  disabled={archiving}
+                  className="bg-[#a0455d] text-white hover:bg-[#8c3b50]"
+                >
+                  {archiving ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
+                      Archivando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="size-4" data-icon="inline-start" aria-hidden="true" />
+                      Marcar como atendido
+                    </>
+                  )}
+                </Button>
+              </>
+            ) : null}
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/">Salir</Link>}
+            />
+          </div>
         </div>
       </header>
 
@@ -82,10 +152,7 @@ export function PanelDashboard() {
           <PatientDetail
             paciente={selected}
             onBack={() => setSelectedId(null)}
-            onArchived={async () => {
-              setSelectedId(null);
-              await mutate();
-            }}
+            error={archiveError}
           />
         ) : (
           <>
@@ -229,49 +296,14 @@ function PatientList({
 function PatientDetail({
   paciente,
   onBack,
-  onArchived,
+  error,
 }: {
   paciente: Paciente;
   onBack: () => void;
-  onArchived: () => Promise<void>;
+  error: string | null;
 }) {
-  const [archiving, setArchiving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const secciones = buildDetalle(paciente);
-
-  // Exporta los datos de este paciente como archivo CSV (se abre en Excel/Sheets).
-  function handleExport() {
-    const csv = pacientesToCsv([paciente]);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const slug = paciente.full_name
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `paciente-${slug || paciente.dni}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-
-  async function handleArchive() {
-    setError(null);
-    setArchiving(true);
-    const result = await marcarAtendido(paciente.id);
-    if (result.ok) {
-      await onArchived();
-    } else {
-      setArchiving(false);
-      setError(result.error);
-    }
-  }
 
   // Header: solo datos de identificación rápida (el detalle completo va en la tab).
   const metaParts = [
@@ -364,37 +396,14 @@ function PatientDetail({
         </dl>
       </div>
 
-      {/* Barra de acciones fija */}
-      <div className="shrink-0 flex flex-col gap-2 border-t border-[#eceef1] bg-white px-6 py-4">
-        {error ? (
+      {/* Error de archivado (si ocurre) */}
+      {error ? (
+        <div className="shrink-0 border-t border-[#eceef1] bg-white px-6 py-3">
           <p className="text-sm text-destructive" role="alert">
             {error}
           </p>
-        ) : null}
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button variant="outline" onClick={handleExport} disabled={archiving}>
-            <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
-            Exportar
-          </Button>
-          <Button
-            onClick={handleArchive}
-            disabled={archiving}
-            className="bg-[#a0455d] text-white hover:bg-[#8c3b50]"
-          >
-            {archiving ? (
-              <>
-                <Loader2 className="size-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
-                Archivando...
-              </>
-            ) : (
-              <>
-                <Check className="size-4" data-icon="inline-start" aria-hidden="true" />
-                Marcar como atendido
-              </>
-            )}
-          </Button>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
