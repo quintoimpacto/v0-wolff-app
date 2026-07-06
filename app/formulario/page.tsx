@@ -51,9 +51,9 @@ const STEPS = [
   },
 ] as const;
 
-// Font scale levels for the text-size segmented control (chico / mediano / grande).
-const SCALES = [1, 1.15, 1.3] as const;
-const SCALE_LABELS = ["Texto chico", "Texto mediano", "Texto grande"] as const;
+// Font scale levels for the text-size control (normal / grande).
+const SCALES = [1, 1.3] as const;
+const SCALE_LABELS = ["Texto normal", "Texto grande"] as const;
 const DEFAULT_SCALE_INDEX = 0;
 
 export default function FormularioPage() {
@@ -191,14 +191,14 @@ export default function FormularioPage() {
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
           <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
           <div
-            className="flex items-stretch overflow-hidden rounded-lg border border-[#dcdcdc]"
+            className="flex items-center gap-3"
             role="group"
             aria-label="Tamaño de texto"
           >
             {SCALES.map((_, i) => {
               const active = scaleIndex === i;
-              // "A" progresivamente más grande para representar chico / mediano / grande.
-              const fontClass = i === 0 ? "text-[11px]" : i === 1 ? "text-[14px]" : "text-[17px]";
+              // "A" chica para el tamaño normal, "A" grande para el ampliado.
+              const fontClass = i === 0 ? "text-[13px]" : "text-[17px]";
               return (
                 <button
                   key={i}
@@ -207,11 +207,8 @@ export default function FormularioPage() {
                   aria-label={SCALE_LABELS[i]}
                   aria-pressed={active}
                   className={
-                    "flex h-9 w-9 items-center justify-center font-semibold leading-none transition-colors " +
-                    (i > 0 ? "border-l border-[#dcdcdc] " : "") +
-                    (active
-                      ? "bg-[#333333] text-white"
-                      : "bg-transparent text-[#8a8a8a] hover:bg-[#f2f2f2] hover:text-[#333333]")
+                    "font-semibold leading-none transition-colors " +
+                    (active ? "text-[#1a1a1a]" : "text-[#9ca3af] hover:text-[#4b5563]")
                   }
                 >
                   <span className={fontClass} aria-hidden="true">
