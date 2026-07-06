@@ -48,7 +48,7 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 
   return (
     <main className="flex min-h-dvh flex-1 items-center justify-center bg-secondary px-6 py-12">
-      <Card className="w-full max-w-sm rounded-2xl border border-[#ededed] p-8 text-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="w-full max-w-sm rounded-2xl border border-[#f0f0f0] p-8 text-center shadow-none">
         <CardContent className="flex flex-col items-center gap-0 p-0 pt-4">
           <WolffLogo width={140} height={101} className="w-28" priority />
 
