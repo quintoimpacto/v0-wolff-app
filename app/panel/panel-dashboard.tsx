@@ -312,7 +312,7 @@ function PatientDetail({
   const activeSeccion = secciones[activeTab] ?? secciones[0];
 
   return (
-    <div className="flex h-[calc(100dvh-10rem)] flex-col overflow-hidden rounded-xl border border-[#eceef1] bg-white text-[#1f2228]">
+    <div className="flex max-h-[calc(100dvh-10rem)] flex-col overflow-hidden rounded-xl border border-[#eceef1] bg-white text-[#1f2228]">
       {/* Header del paciente */}
       <div className="shrink-0 border-b border-[#eceef1] px-6 pb-5 pt-5">
         <button
@@ -361,8 +361,8 @@ function PatientDetail({
         })}
       </div>
 
-      {/* Contenido de la tab activa (crece para llenar el espacio, sin scroll propio) */}
-      <div className="flex-1 px-6 py-4">
+      {/* Contenido de la tab activa: se ajusta al contenido y hace scroll solo si excede la caja */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
         <dl className="flex flex-col">
           {activeSeccion.items.map((item, index) => {
             const firstSintoma =
