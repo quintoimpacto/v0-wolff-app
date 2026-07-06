@@ -171,9 +171,10 @@ export default function FormularioPage() {
             esperar a que te llamen a la consulta.
           </p>
           <Button
+            variant="outline"
             size="lg"
             nativeButton={false}
-            className="mt-8 h-14 w-full max-w-xs text-base"
+            className="mt-8 h-14 w-full max-w-xs border-primary bg-transparent text-base font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
             render={<Link href="/">Volver al inicio</Link>}
           />
         </main>
