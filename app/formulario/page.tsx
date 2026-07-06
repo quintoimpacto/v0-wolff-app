@@ -160,7 +160,7 @@ export default function FormularioPage() {
           </div>
         </header>
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-10 text-center">
-          <span className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <span className="flex size-20 items-center justify-center rounded-full bg-green-100 text-green-600">
             <Check className="size-10" aria-hidden="true" />
           </span>
           <h1 className="mt-6 text-balance text-3xl font-bold leading-tight tracking-tight text-foreground">
