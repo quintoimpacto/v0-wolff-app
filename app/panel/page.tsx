@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Eye, EyeOff, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -49,14 +49,10 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   return (
     <main className="flex min-h-dvh flex-1 items-center justify-center bg-secondary px-6 py-12">
       <Card className="w-full max-w-sm rounded-2xl border border-border/50 p-8 text-center shadow-sm">
-        <CardContent className="flex flex-col items-center gap-0 p-0">
-          <WolffLogo width={140} height={101} className="w-20" priority />
+        <CardContent className="flex flex-col items-center gap-0 p-0 pt-4">
+          <WolffLogo width={140} height={101} className="w-28" priority />
 
-          <span className="mt-8 flex size-12 items-center justify-center rounded-full bg-[#f0f0ee] text-[#1a1a1a]">
-            <Lock className="size-5" aria-hidden="true" />
-          </span>
-
-          <h1 className="mt-6 text-2xl font-bold leading-tight tracking-tight text-foreground">
+          <h1 className="mt-10 text-2xl font-bold leading-tight tracking-tight text-foreground">
             Panel médico
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -111,7 +107,7 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
               type="submit"
               size="lg"
               disabled={isEmpty || loading}
-              className="h-12 w-full rounded-lg bg-[#6b2c3e] text-base text-white hover:bg-[#5c2534] disabled:opacity-50"
+              className="h-12 w-full rounded-lg bg-primary text-base text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {loading ? (
                 <>
