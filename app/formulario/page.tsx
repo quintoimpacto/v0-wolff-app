@@ -174,7 +174,7 @@ export default function FormularioPage() {
             variant="outline"
             size="lg"
             nativeButton={false}
-            className="mt-8 h-12 w-full max-w-xs text-base"
+            className="mt-8 h-12 w-full max-w-xs border-[1.5px] border-[#cccccc] text-base font-medium text-foreground hover:border-foreground/40 hover:bg-muted"
             render={<Link href="/">Volver al inicio</Link>}
           />
         </main>
