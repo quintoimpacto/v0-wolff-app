@@ -22,8 +22,10 @@ export async function GET() {
     const { data, error } = await supabase
       .from("pacientes")
       .select("*")
-      .eq("atendido", false)
+      // Incluye atendidos y no atendidos: los atendidos van al fondo (atendido asc),
+      // y dentro de cada grupo, los más recientes primero.
       .gte("created_at", inicioDeHoyAR())
+      .order("atendido", { ascending: true })
       .order("created_at", { ascending: false });
 
     if (error) {

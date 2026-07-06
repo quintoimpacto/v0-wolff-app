@@ -2,18 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Lock } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PanelDashboard } from "./panel-dashboard";
 
 // Simple placeholder gate — not real authentication.
@@ -32,60 +25,114 @@ export default function PanelPage() {
 function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password === PANEL_PASSWORD) {
-      setError(false);
-      onUnlock();
-    } else {
-      setError(true);
-    }
+    if (loading) return;
+    setLoading(true);
+    // Pequeño delay para reflejar el estado de validación.
+    setTimeout(() => {
+      if (password === PANEL_PASSWORD) {
+        setError(false);
+        onUnlock();
+      } else {
+        setError(true);
+        setLoading(false);
+      }
+    }, 500);
   }
+
+  const isEmpty = password.trim().length === 0;
 
   return (
     <main className="flex min-h-dvh flex-1 items-center justify-center bg-secondary px-6 py-12">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="items-center text-center">
-          <WolffLogo width={140} height={101} className="w-32" priority />
-          <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Lock className="size-5" aria-hidden="true" />
-          </span>
-          <CardTitle className="text-2xl font-bold tracking-tight">Panel médico</CardTitle>
-          <CardDescription className="text-sm">
+      <Card className="w-full max-w-sm rounded-2xl border border-[#f0f0f0] p-8 text-center shadow-none">
+        <CardContent className="flex flex-col items-center gap-0 p-0 pt-4">
+          <Link href="/" aria-label="Ir al inicio" className="inline-flex">
+            <WolffLogo width={140} height={101} className="w-28" priority />
+          </Link>
+
+          <h1 className="mt-10 text-2xl font-bold leading-tight tracking-tight text-foreground">
+            Panel médico
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Ingresá la contraseña para continuar
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-9 flex w-full flex-col gap-4 text-left">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (error) setError(false);
-                }}
-                placeholder="••••••••"
-                autoFocus
-                aria-invalid={error}
-              />
+              <Label htmlFor="password" className="text-[13px] font-medium text-muted-foreground">
+                Contraseña
+              </Label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError(false);
+                  }}
+                  placeholder="••••••••"
+                  aria-invalid={error}
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-3.5 pr-11 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-[#cccccc] focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive/20"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="size-4" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               {error ? (
-                <p className="text-sm text-destructive">Contraseña incorrecta.</p>
+                <p className="text-[13px] text-destructive">
+                  Contraseña incorrecta, intentá de nuevo
+                </p>
               ) : null}
+              <Link
+                href="/"
+                className="self-end text-[13px] text-muted-foreground no-underline transition-colors hover:text-foreground hover:underline"
+              >
+                ¿Olvidaste la contraseña?
+              </Link>
             </div>
-            <Button type="submit" className="w-full">
-              Entrar
-            </Button>
+
             <Button
-              variant="ghost"
-              nativeButton={false}
-              className="w-full text-muted-foreground"
-              render={<Link href="/">Volver al inicio</Link>}
-            />
+              type="submit"
+              size="lg"
+              disabled={isEmpty || loading}
+              className="h-12 w-full rounded-lg bg-primary text-base text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  Ingresando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </Button>
           </form>
+
+          <Link
+            href="/"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            Volver al inicio
+          </Link>
+
+          <p className="mt-6 text-xs text-muted-foreground/70">
+            Acceso restringido a personal autorizado de Wolff Medicina del Deporte
+          </p>
         </CardContent>
       </Card>
     </main>

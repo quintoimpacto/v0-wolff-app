@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   CalendarDays,
   Check,
+  CheckCircle2,
   ChevronRight,
   ClipboardList,
   Clock,
@@ -57,6 +58,7 @@ export function PanelDashboard() {
 
   const pacientes = data?.pacientes ?? [];
   const selected = pacientes.find((p) => p.id === selectedId) ?? null;
+  const pendientesCount = pacientes.filter((p) => !p.atendido).length;
 
   const today = new Intl.DateTimeFormat("es-AR", {
     weekday: "long",
@@ -104,7 +106,9 @@ export function PanelDashboard() {
     <div className="flex min-h-dvh flex-col bg-[#ffffff]">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
-          <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
+          <Link href="/" aria-label="Ir al inicio" className="inline-flex">
+            <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
+          </Link>
           <div className="flex items-center gap-3">
             {selected ? (
               <>
@@ -117,24 +121,31 @@ export function PanelDashboard() {
                   <Download className="size-4" data-icon="inline-start" aria-hidden="true" />
                   Exportar
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleArchive(selected)}
-                  disabled={archiving}
-                  className="bg-[#a0455d] text-white hover:bg-[#8c3b50]"
-                >
-                  {archiving ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
-                      Archivando...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="size-4" data-icon="inline-start" aria-hidden="true" />
-                      Marcar como atendido
-                    </>
-                  )}
-                </Button>
+                {selected.atendido ? (
+                  <span className="flex items-center gap-1.5 rounded-full bg-[#e7f4ea] px-3 py-1.5 text-sm font-semibold text-[#2f7d46]">
+                    <CheckCircle2 className="size-4" aria-hidden="true" />
+                    Atendido
+                  </span>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => handleArchive(selected)}
+                    disabled={archiving}
+                    className="bg-[#a0455d] text-white hover:bg-[#8c3b50]"
+                  >
+                    {archiving ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
+                        Archivando...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="size-4" data-icon="inline-start" aria-hidden="true" />
+                        Marcar como atendido
+                      </>
+                    )}
+                  </Button>
+                )}
               </>
             ) : null}
             <Button
@@ -168,9 +179,9 @@ export function PanelDashboard() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                {pacientes.length > 0 ? (
-                  <span className="rounded-full bg-[#f0f0ee] px-3 py-1 text-sm font-semibold text-[#333333]">
-                    {pacientes.length} en espera
+                {pendientesCount > 0 ? (
+                  <span className="rounded-full bg-[#fdf3e0] px-3 py-1 text-sm font-semibold text-[#a56a0f]">
+                    {pendientesCount} en espera
                   </span>
                 ) : null}
                 <button
@@ -263,34 +274,75 @@ function PatientList({
     );
   }
 
+  const pendientes = pacientes.filter((p) => !p.atendido);
+  const atendidos = pacientes.filter((p) => p.atendido);
+
   return (
-    <ul className="mt-8 flex flex-col gap-3">
-      {pacientes.map((p) => (
-        <li key={p.id}>
-          <button
-            type="button"
-            onClick={() => onSelect(p.id)}
-            className="flex w-full items-center gap-4 rounded-lg border-[0.5px] border-[#e8e6e1] bg-[#ffffff] p-4 text-left transition-colors hover:border-[#cccccc]"
-          >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#ececea] text-sm font-bold text-[#5a5a56]">
-              {initials(p.full_name)}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold text-[#111111]">{p.full_name}</p>
-              <p className="truncate text-sm text-[#6b6b67]">
-                DNI {p.dni}
-                {p.edad != null ? ` · ${p.edad} años` : ""}
-              </p>
-            </div>
-            <span className="flex items-center gap-1.5 text-sm font-medium text-[#9b9b96]">
-              <Clock className="size-4" aria-hidden="true" />
-              {formatHora(p.created_at)}
-            </span>
-            <ChevronRight className="size-5 shrink-0 text-[#9b9b96]" aria-hidden="true" />
-          </button>
-        </li>
-      ))}
-    </ul>
+    <div className="mt-8 flex flex-col gap-6">
+      {pendientes.length > 0 ? (
+        <ul className="flex flex-col gap-3">
+          {pendientes.map((p) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(p.id)}
+                className="flex w-full items-center gap-4 rounded-lg border-[0.5px] border-[#e8e6e1] bg-[#ffffff] p-4 text-left transition-colors hover:border-[#cccccc]"
+              >
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#ececea] text-sm font-bold text-[#5a5a56]">
+                  {initials(p.full_name)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-[#111111]">{p.full_name}</p>
+                  <p className="truncate text-sm text-[#6b6b67]">
+                    DNI {p.dni}
+                    {p.edad != null ? ` · ${p.edad} años` : ""}
+                  </p>
+                </div>
+                <span className="flex items-center gap-1.5 text-sm font-medium text-[#9b9b96]">
+                  <Clock className="size-4" aria-hidden="true" />
+                  {formatHora(p.created_at)}
+                </span>
+                <ChevronRight className="size-5 shrink-0 text-[#9b9b96]" aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {atendidos.length > 0 ? (
+        <section aria-label="Pacientes atendidos" className="flex flex-col gap-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#9b9b96]">
+            Atendidos ({atendidos.length})
+          </p>
+          <ul className="flex flex-col gap-3">
+            {atendidos.map((p) => (
+              <li key={p.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(p.id)}
+                  className="flex w-full items-center gap-4 rounded-lg border-[0.5px] border-[#eeeeec] bg-[#fafafa] p-4 text-left opacity-70 transition-opacity hover:opacity-100"
+                >
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#e6e6e4] text-sm font-bold text-[#9b9b96]">
+                    {initials(p.full_name)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-[#6b6b67]">{p.full_name}</p>
+                    <p className="truncate text-sm text-[#9b9b96]">
+                      DNI {p.dni}
+                      {p.edad != null ? ` · ${p.edad} años` : ""}
+                    </p>
+                  </div>
+                  <span className="flex items-center gap-1.5 rounded-full bg-[#e7f4ea] px-2.5 py-1 text-xs font-semibold text-[#2f7d46]">
+                    <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                    Atendido
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </div>
   );
 }
 
@@ -312,7 +364,7 @@ function PatientDetail({
   const activeSeccion = secciones[activeTab] ?? secciones[0];
 
   return (
-    <div className="flex h-[calc(100dvh-10rem)] flex-col overflow-hidden rounded-xl border border-[#eceef1] bg-white text-[#1f2228]">
+    <div className="flex max-h-[calc(100dvh-10rem)] flex-col overflow-hidden rounded-xl border border-[#eceef1] bg-white text-[#1f2228]">
       {/* Header del paciente */}
       <div className="shrink-0 border-b border-[#eceef1] px-6 pb-5 pt-5">
         <button
@@ -361,8 +413,8 @@ function PatientDetail({
         })}
       </div>
 
-      {/* Contenido de la tab activa (crece para llenar el espacio, sin scroll propio) */}
-      <div className="flex-1 px-6 py-4">
+      {/* Contenido de la tab activa: se ajusta al contenido y hace scroll solo si excede la caja */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
         <dl className="flex flex-col">
           {activeSeccion.items.map((item, index) => {
             const firstSintoma =

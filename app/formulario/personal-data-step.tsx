@@ -100,10 +100,10 @@ export function isPersonalDataValid(data: PersonalData): boolean {
 }
 
 const inputClass =
-  "h-auto w-full rounded-xl border border-border bg-background px-4 py-3.5 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-input focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25";
+  "h-auto w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-[#cccccc] focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20";
 
 const selectTriggerClass =
-  "w-full justify-between rounded-xl border-input px-4 py-3.5 text-[1em] font-medium text-foreground data-[size=default]:h-auto data-placeholder:font-normal data-placeholder:text-muted-foreground [&>svg]:text-foreground/60";
+  "w-full justify-between rounded-lg border-input px-3.5 py-2.5 text-[0.875em] font-medium text-muted-foreground data-[size=default]:h-auto data-placeholder:font-normal data-placeholder:text-muted-foreground [&>svg]:text-foreground/60";
 
 // Resaltado de la opción: fondo de marca SÓLIDO con texto blanco para contraste legible.
 // `**:text-*` reescribe el color del texto hijo, que la clase base fuerza al resaltar.
@@ -121,10 +121,10 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
   const age = calculateAge(value.day, value.month, value.year);
 
   return (
-    <div className="mt-6 flex flex-col gap-6">
+    <div className="mt-8 flex flex-col gap-6">
       {/* Nombre y apellido */}
       <div className="flex flex-col gap-2">
-        <label htmlFor="fullName" className="text-[1em] font-medium text-foreground">
+        <label htmlFor="fullName" className="text-[0.875em] font-medium text-muted-foreground">
           Nombre y apellido <span className="text-primary">*</span>
         </label>
         <input
@@ -142,7 +142,7 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
 
       {/* DNI */}
       <div className="flex flex-col gap-2">
-        <label htmlFor="dni" className="text-[1em] font-medium text-foreground">
+        <label htmlFor="dni" className="text-[0.875em] font-medium text-muted-foreground">
           DNI <span className="text-primary">*</span>
         </label>
         <input
@@ -164,7 +164,7 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
 
       {/* Fecha de nacimiento */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-[1em] font-medium text-foreground">
+        <legend className="mb-2 text-[0.875em] font-medium text-muted-foreground">
           Fecha de nacimiento <span className="text-primary">*</span>
         </legend>
         <div className="flex gap-2">
@@ -246,7 +246,7 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
       {/* Peso y altura */}
       <div className="flex gap-3">
         <div className="flex flex-1 flex-col gap-2">
-          <label htmlFor="weight" className="text-[1em] font-medium text-foreground">
+          <label htmlFor="weight" className="text-[0.875em] font-medium text-muted-foreground">
             Peso (kg)
           </label>
           <input
@@ -261,7 +261,7 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
           />
         </div>
         <div className="flex flex-1 flex-col gap-2">
-          <label htmlFor="height" className="text-[1em] font-medium text-foreground">
+          <label htmlFor="height" className="text-[0.875em] font-medium text-muted-foreground">
             Altura (cm)
           </label>
           <input
@@ -279,19 +279,19 @@ export function PersonalDataStep({ value, onChange }: PersonalDataStepProps) {
 
       {/* Sexo */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-[1em] font-medium text-foreground">Sexo</legend>
+        <legend className="mb-2 text-[0.875em] font-medium text-muted-foreground">Sexo</legend>
         <RadioGroup
           value={value.sexo}
           onValueChange={(v) => onChange({ sexo: v as Sexo })}
-          className="gap-2.5"
+          className="gap-0"
         >
           {SEX_OPTIONS.map((option) => (
             <label
               key={option.value}
-              className="flex cursor-pointer items-center gap-3 rounded-xl border border-input bg-background p-3.5 transition-colors has-data-checked:border-primary"
+              className="flex cursor-pointer items-center gap-3 border-b border-border py-3 text-foreground transition-colors last:border-b-0 has-data-checked:text-primary"
             >
               <RadioGroupItem value={option.value} className="size-[1.25em]" />
-              <span className="text-[1em] text-foreground">{option.label}</span>
+              <span className="text-[1em]">{option.label}</span>
             </label>
           ))}
         </RadioGroup>

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, AlertCircle } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { guardarPaciente } from "./actions";
 import {
   PersonalDataStep,
@@ -52,9 +51,10 @@ const STEPS = [
   },
 ] as const;
 
-// Font scale levels for the A- / A+ control.
-const SCALES = [0.9, 1, 1.15, 1.3] as const;
-const DEFAULT_SCALE_INDEX = 1;
+// Font scale levels for the text-size control (normal / grande).
+const SCALES = [1, 1.3] as const;
+const SCALE_LABELS = ["Texto normal", "Texto grande"] as const;
+const DEFAULT_SCALE_INDEX = 0;
 
 export default function FormularioPage() {
   const [step, setStep] = useState(0);
@@ -154,14 +154,17 @@ export default function FormularioPage() {
   // Pantalla de confirmación: el formulario ya no se puede editar.
   if (submittedName) {
     return (
-      <div className="flex min-h-dvh flex-col bg-secondary">
-        <header className="sticky top-0 z-10 border-b border-border bg-background">
-          <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
+    <div className="flex min-h-dvh flex-col bg-background">
+      {/* Top bar with logo + font size controls (fixed at top) */}
+      <header className="sticky top-0 z-10 border-b border-border bg-background">
+        <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
+          <Link href="/" aria-label="Ir al inicio" className="inline-flex">
             <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+          </Link>
           </div>
         </header>
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-10 text-center">
-          <span className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <span className="flex size-20 items-center justify-center rounded-full bg-green-100 text-green-600">
             <Check className="size-10" aria-hidden="true" />
           </span>
           <h1 className="mt-6 text-balance text-3xl font-bold leading-tight tracking-tight text-foreground">
@@ -175,7 +178,7 @@ export default function FormularioPage() {
             variant="outline"
             size="lg"
             nativeButton={false}
-            className="mt-8 h-12 w-full max-w-xs text-base"
+            className="mt-8 h-14 w-full max-w-xs border-primary bg-transparent text-base font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
             render={<Link href="/">Volver al inicio</Link>}
           />
         </main>
@@ -184,70 +187,73 @@ export default function FormularioPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-secondary">
+    <div className="flex min-h-dvh flex-col bg-background">
       {/* Top bar with logo + font size controls (fixed at top) */}
       <header className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
-          <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+          <Link href="/" aria-label="Ir al inicio" className="inline-flex">
+            <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+          </Link>
           <div
-            className="flex items-stretch overflow-hidden rounded-full border border-border"
+            className="flex items-center gap-3"
             role="group"
-            aria-label="Tamaño del texto"
+            aria-label="Tamaño de texto"
           >
-            <button
-              type="button"
-              onClick={() => setScaleIndex((i) => Math.max(0, i - 1))}
-              disabled={scaleIndex === 0}
-              aria-label="Reducir tamaño del texto"
-              className="flex h-11 w-12 items-center justify-center font-semibold leading-none text-foreground transition-colors hover:bg-muted disabled:opacity-40"
-            >
-              <span className="text-xs" aria-hidden="true">A</span>
-            </button>
-            <span className="w-px self-stretch bg-border" aria-hidden="true" />
-            <button
-              type="button"
-              onClick={() => setScaleIndex((i) => Math.min(SCALES.length - 1, i + 1))}
-              disabled={scaleIndex === SCALES.length - 1}
-              aria-label="Aumentar tamaño del texto"
-              className="flex h-11 w-12 items-center justify-center font-bold leading-none text-foreground transition-colors hover:bg-muted disabled:opacity-40"
-            >
-              <span className="text-2xl" aria-hidden="true">A</span>
-            </button>
+            {SCALES.map((_, i) => {
+              const active = scaleIndex === i;
+              // "A" chica para el tamaño normal, "A" grande para el ampliado.
+              const fontClass = i === 0 ? "text-[13px]" : "text-[17px]";
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setScaleIndex(i)}
+                  aria-label={SCALE_LABELS[i]}
+                  aria-pressed={active}
+                  className={
+                    "font-semibold leading-none transition-colors " +
+                    (active ? "text-[#1a1a1a]" : "text-[#9ca3af] hover:text-[#4b5563]")
+                  }
+                >
+                  <span className={fontClass} aria-hidden="true">
+                    A
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">
         {/* Progress */}
-        <section aria-label="Progreso del formulario" className="flex flex-col gap-2">
-          <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
+        <section aria-label="Progreso del formulario" className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-between text-[13px] text-muted-foreground">
             <span>
               Paso {step + 1} de {STEPS.length}
             </span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <ol className="flex items-center gap-1.5" aria-hidden="true">
-            {STEPS.map((s, i) => (
-              <li
-                key={s.title}
-                className={cn(
-                  "h-2 flex-1 rounded-full transition-colors",
-                  i <= step ? "bg-primary" : "bg-border",
-                )}
-              />
-            ))}
-          </ol>
+          <div
+            className="h-[3px] w-full overflow-hidden rounded-full bg-border"
+            aria-hidden="true"
+          >
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </section>
 
         {/* Step content — font size scales with the A-/A+ control */}
         <section
-          className="mt-8 flex flex-1 flex-col"
+          className="mt-10 flex flex-1 flex-col"
           style={{ fontSize: `${fontPx}px` }}
         >
-          <p className="text-[0.8125em] font-semibold uppercase tracking-[0.12em] text-primary">
+          <p className="text-[0.75em] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
             Formulario del paciente
           </p>
-          <h1 className="mt-1.5 text-balance text-[2.125em] font-bold leading-[1.1] tracking-tight text-foreground">
+          <h1 className="mt-3 text-balance text-[2.125em] font-bold leading-[1.1] tracking-tight text-foreground">
             {current.title}
           </h1>
           <p className="mt-2 text-pretty text-[0.9375em] leading-relaxed text-muted-foreground">
