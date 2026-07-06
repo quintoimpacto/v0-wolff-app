@@ -48,22 +48,22 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 
   return (
     <main className="flex min-h-dvh flex-1 items-center justify-center bg-secondary px-6 py-12">
-      <Card className="w-full max-w-sm rounded-2xl border border-border p-8 text-center shadow-sm">
+      <Card className="w-full max-w-sm rounded-2xl border border-border/50 p-8 text-center shadow-sm">
         <CardContent className="flex flex-col items-center gap-0 p-0">
-          <WolffLogo width={140} height={101} className="w-24" priority />
+          <WolffLogo width={140} height={101} className="w-20" priority />
 
-          <span className="mt-5 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <span className="mt-8 flex size-12 items-center justify-center rounded-full bg-[#f0f0ee] text-[#1a1a1a]">
             <Lock className="size-5" aria-hidden="true" />
           </span>
 
-          <h1 className="mt-5 text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="mt-6 text-2xl font-bold leading-tight tracking-tight text-foreground">
             Panel médico
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Ingresá la contraseña para continuar
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-7 flex w-full flex-col gap-4 text-left">
+          <form onSubmit={handleSubmit} className="mt-9 flex w-full flex-col gap-4 text-left">
             <div className="flex flex-col gap-2">
               <Label htmlFor="password" className="text-[13px] font-medium text-muted-foreground">
                 Contraseña
@@ -78,9 +78,8 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
                     if (error) setError(false);
                   }}
                   placeholder="••••••••"
-                  autoFocus
                   aria-invalid={error}
-                  className="h-11 w-full rounded-lg border border-input bg-background pl-3.5 pr-11 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-[#cccccc] focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive/20"
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-3.5 pr-11 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-[#cccccc] focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive/20"
                 />
                 <button
                   type="button"
@@ -102,7 +101,7 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
               ) : null}
               <Link
                 href="/"
-                className="self-end text-[13px] text-primary no-underline hover:underline"
+                className="self-end text-[13px] text-muted-foreground no-underline transition-colors hover:text-foreground hover:underline"
               >
                 ¿Olvidaste la contraseña?
               </Link>
@@ -112,7 +111,7 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
               type="submit"
               size="lg"
               disabled={isEmpty || loading}
-              className="h-12 w-full rounded-lg text-base disabled:opacity-50"
+              className="h-12 w-full rounded-lg bg-[#6b2c3e] text-base text-white hover:bg-[#5c2534] disabled:opacity-50"
             >
               {loading ? (
                 <>
