@@ -153,10 +153,11 @@ export default function FormularioPage() {
   // Pantalla de confirmación: el formulario ya no se puede editar.
   if (submittedName) {
     return (
-      <div className="flex min-h-dvh flex-col bg-secondary">
-        <header className="sticky top-0 z-10 border-b border-border bg-background">
-          <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
-            <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+    <div className="flex min-h-dvh flex-col bg-background">
+      {/* Top bar with logo + font size controls (fixed at top) */}
+      <header className="sticky top-0 z-10 border-b border-border bg-background">
+        <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
+          <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
           </div>
         </header>
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-10 text-center">
@@ -183,7 +184,7 @@ export default function FormularioPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-secondary">
+    <div className="flex min-h-dvh flex-col bg-background">
       {/* Top bar with logo + font size controls (fixed at top) */}
       <header className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
