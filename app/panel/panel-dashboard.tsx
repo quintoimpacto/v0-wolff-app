@@ -169,7 +169,7 @@ export function PanelDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 {pacientes.length > 0 ? (
-                  <span className="rounded-full bg-[#f0f0ee] px-3 py-1 text-sm font-semibold text-[#333333]">
+                  <span className="rounded-full bg-[#c88912]/12 px-3 py-1 text-sm font-semibold text-[#8a5e0c]">
                     {pacientes.length} en espera
                   </span>
                 ) : null}
