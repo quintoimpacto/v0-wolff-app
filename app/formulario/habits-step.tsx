@@ -29,7 +29,6 @@ export interface HabitsData {
   exCigarrillosDia: string;
   exEdadInicio: string;
   exAniosDejo: string;
-  exAniosTotal: string;
   /** Alimentación (opcional) */
   alimentacion: Alimentacion;
   /** Síntomas */
@@ -45,7 +44,6 @@ export const emptyHabitsData: HabitsData = {
   exCigarrillosDia: "",
   exEdadInicio: "",
   exAniosDejo: "",
-  exAniosTotal: "",
   alimentacion: "",
   desmayos: "",
   dolorPecho: "",
@@ -98,8 +96,7 @@ export function isHabitsDataValid(data: HabitsData): boolean {
     fumaOk =
       data.exCigarrillosDia.trim().length > 0 &&
       data.exEdadInicio.trim().length > 0 &&
-      data.exAniosDejo.trim().length > 0 &&
-      data.exAniosTotal.trim().length > 0;
+      data.exAniosDejo.trim().length > 0;
   }
 
   const sintomasOk =
@@ -223,7 +220,6 @@ export function HabitsStep({ value, onChange }: HabitsStepProps) {
                     exCigarrillosDia: "",
                     exEdadInicio: "",
                     exAniosDejo: "",
-                    exAniosTotal: "",
                   }
                 : v === "ex"
                   ? { fuma: v as Fuma, cigarrillosDia: "", edadInicioFuma: "" }
@@ -234,7 +230,6 @@ export function HabitsStep({ value, onChange }: HabitsStepProps) {
                       exCigarrillosDia: "",
                       exEdadInicio: "",
                       exAniosDejo: "",
-                      exAniosTotal: "",
                     },
             )
           }
@@ -294,14 +289,6 @@ export function HabitsStep({ value, onChange }: HabitsStepProps) {
           disabled={!exFumador}
           placeholder="Ej: 3"
           onValueChange={(v) => onChange({ exAniosDejo: v })}
-        />
-        <NumberField
-          id="ex-anios-total"
-          label="¿Por cuánto tiempo fumó en total? (años)"
-          value={value.exAniosTotal}
-          disabled={!exFumador}
-          placeholder="Ej: 15"
-          onValueChange={(v) => onChange({ exAniosTotal: v })}
         />
       </Collapsible>
 

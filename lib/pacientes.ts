@@ -81,6 +81,20 @@ function text(value?: string): string {
   return value && value.trim().length > 0 ? value : "—";
 }
 
+/**
+ * Años totales que fumó un ex fumador, calculado a partir de la edad actual,
+ * la edad de inicio y hace cuántos años dejó: (edad − edadInicio) − añosDejó.
+ * Evita pedirle esta cuenta al usuario cuando ya tenemos los datos.
+ */
+function aniosFumo(edad: number | null, exEdadInicio?: string, exAniosDejo?: string): string {
+  if (edad == null) return "—";
+  const inicio = Number(exEdadInicio);
+  const dejo = Number(exAniosDejo);
+  if (!Number.isFinite(inicio) || !Number.isFinite(dejo)) return "—";
+  const total = edad - inicio - dejo;
+  return total > 0 ? String(total) : "—";
+}
+
 /** Formatea la hora de envío en horario local argentino. */
 export function formatHora(iso: string): string {
   return new Intl.DateTimeFormat("es-AR", {
@@ -134,7 +148,7 @@ const CSV_COLUMNS: { header: string; get: (p: Paciente) => string }[] = [
   { header: "Cigarrillos por día (ex)", get: (p) => text(p.datos.habits?.exCigarrillosDia) },
   { header: "Edad de inicio (ex)", get: (p) => text(p.datos.habits?.exEdadInicio) },
   { header: "Hace cuánto que dejó", get: (p) => text(p.datos.habits?.exAniosDejo) },
-  { header: "Años total que fumó", get: (p) => text(p.datos.habits?.exAniosTotal) },
+  { header: "Años total que fumó", get: (p) => aniosFumo(p.edad, p.datos.habits?.exEdadInicio, p.datos.habits?.exAniosDejo) },
   { header: "Alimentación", get: (p) => label(ALIMENTACION, p.datos.habits?.alimentacion) },
   { header: "Desmayos", get: (p) => label(SI_NO, p.datos.habits?.desmayos) },
   { header: "Dolor de pecho", get: (p) => label(SI_NO, p.datos.habits?.dolorPecho) },
@@ -232,7 +246,13 @@ export function buildDetalle(p: Paciente): DetalleSeccion[] {
       { label: "Cigarrillos por día (antes)", value: text(habits.exCigarrillosDia) },
       { label: "Edad de inicio", value: habits.exEdadInicio ? `${habits.exEdadInicio} años` : "—" },
       { label: "Hace cuánto que dejó", value: habits.exAniosDejo ? `${habits.exAniosDejo} años` : "—" },
-      { label: "Tiempo total que fumó", value: habits.exAniosTotal ? `${habits.exAniosTotal} años` : "—" },
+      {
+        label: "Tiempo total que fumó",
+        value: (() => {
+          const a = aniosFumo(p.edad, habits.exEdadInicio, habits.exAniosDejo);
+          return a === "—" ? "—" : `${a} años`;
+        })(),
+      },
     );
   }
   habitsItems.push(
