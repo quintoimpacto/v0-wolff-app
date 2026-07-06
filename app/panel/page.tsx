@@ -50,7 +50,9 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
     <main className="flex min-h-dvh flex-1 items-center justify-center bg-secondary px-6 py-12">
       <Card className="w-full max-w-sm rounded-2xl border border-[#f0f0f0] p-8 text-center shadow-none">
         <CardContent className="flex flex-col items-center gap-0 p-0 pt-4">
-          <WolffLogo width={140} height={101} className="w-28" priority />
+          <Link href="/" aria-label="Ir al inicio" className="inline-flex">
+            <WolffLogo width={140} height={101} className="w-28" priority />
+          </Link>
 
           <h1 className="mt-10 text-2xl font-bold leading-tight tracking-tight text-foreground">
             Panel médico

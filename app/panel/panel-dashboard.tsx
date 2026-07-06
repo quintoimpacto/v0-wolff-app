@@ -104,7 +104,9 @@ export function PanelDashboard() {
     <div className="flex min-h-dvh flex-col bg-[#ffffff]">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
-          <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
+          <Link href="/" aria-label="Ir al inicio" className="inline-flex">
+            <WolffLogo width={130} height={94} className="h-11 w-auto" priority />
+          </Link>
           <div className="flex items-center gap-3">
             {selected ? (
               <>

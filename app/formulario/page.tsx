@@ -158,7 +158,9 @@ export default function FormularioPage() {
       {/* Top bar with logo + font size controls (fixed at top) */}
       <header className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
-          <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+          <Link href="/" aria-label="Ir al inicio" className="inline-flex">
+            <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+          </Link>
           </div>
         </header>
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-10 text-center">
@@ -189,7 +191,9 @@ export default function FormularioPage() {
       {/* Top bar with logo + font size controls (fixed at top) */}
       <header className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
-          <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+          <Link href="/" aria-label="Ir al inicio" className="inline-flex">
+            <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
+          </Link>
           <div
             className="flex items-center gap-3"
             role="group"
