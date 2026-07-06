@@ -51,9 +51,10 @@ const STEPS = [
   },
 ] as const;
 
-// Font scale levels for the A- / A+ control.
-const SCALES = [0.9, 1, 1.15, 1.3] as const;
-const DEFAULT_SCALE_INDEX = 1;
+// Font scale levels for the text-size segmented control (chico / mediano / grande).
+const SCALES = [1, 1.15, 1.3] as const;
+const SCALE_LABELS = ["Texto chico", "Texto mediano", "Texto grande"] as const;
+const DEFAULT_SCALE_INDEX = 0;
 
 export default function FormularioPage() {
   const [step, setStep] = useState(0);
@@ -190,28 +191,35 @@ export default function FormularioPage() {
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
           <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
           <div
-            className="flex items-center gap-1 rounded-full bg-[#f0f0ee] p-1"
+            className="flex items-stretch overflow-hidden rounded-lg border border-[#dcdcdc]"
             role="group"
-            aria-label="Tamaño del texto"
+            aria-label="Tamaño de texto"
           >
-            <button
-              type="button"
-              onClick={() => setScaleIndex((i) => Math.max(0, i - 1))}
-              disabled={scaleIndex === 0}
-              aria-label="Reducir tamaño del texto"
-              className="flex size-9 items-center justify-center rounded-full font-semibold leading-none text-[#333333] transition-colors hover:bg-[#e4e4e0] disabled:opacity-40"
-            >
-              <span className="text-xs" aria-hidden="true">A</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setScaleIndex((i) => Math.min(SCALES.length - 1, i + 1))}
-              disabled={scaleIndex === SCALES.length - 1}
-              aria-label="Aumentar tamaño del texto"
-              className="flex size-9 items-center justify-center rounded-full font-bold leading-none text-[#333333] transition-colors hover:bg-[#e4e4e0] disabled:opacity-40"
-            >
-              <span className="text-2xl" aria-hidden="true">A</span>
-            </button>
+            {SCALES.map((_, i) => {
+              const active = scaleIndex === i;
+              // "A" progresivamente más grande para representar chico / mediano / grande.
+              const fontClass = i === 0 ? "text-[11px]" : i === 1 ? "text-[14px]" : "text-[17px]";
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setScaleIndex(i)}
+                  aria-label={SCALE_LABELS[i]}
+                  aria-pressed={active}
+                  className={
+                    "flex h-9 w-9 items-center justify-center font-semibold leading-none transition-colors " +
+                    (i > 0 ? "border-l border-[#dcdcdc] " : "") +
+                    (active
+                      ? "bg-[#333333] text-white"
+                      : "bg-transparent text-[#8a8a8a] hover:bg-[#f2f2f2] hover:text-[#333333]")
+                  }
+                >
+                  <span className={fontClass} aria-hidden="true">
+                    A
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </header>
