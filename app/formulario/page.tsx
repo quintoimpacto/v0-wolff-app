@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, AlertCircle } from "lucide-react";
 import { WolffLogo } from "@/components/wolff-logo";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { guardarPaciente } from "./actions";
 import {
   PersonalDataStep,
@@ -190,7 +189,7 @@ export default function FormularioPage() {
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
           <WolffLogo width={120} height={87} className="h-10 w-auto" priority />
           <div
-            className="flex items-stretch overflow-hidden rounded-full border border-border"
+            className="flex items-center gap-1 rounded-full bg-[#f0f0ee] p-1"
             role="group"
             aria-label="Tamaño del texto"
           >
@@ -199,17 +198,16 @@ export default function FormularioPage() {
               onClick={() => setScaleIndex((i) => Math.max(0, i - 1))}
               disabled={scaleIndex === 0}
               aria-label="Reducir tamaño del texto"
-              className="flex h-11 w-12 items-center justify-center font-semibold leading-none text-foreground transition-colors hover:bg-muted disabled:opacity-40"
+              className="flex size-9 items-center justify-center rounded-full font-semibold leading-none text-[#333333] transition-colors hover:bg-[#e4e4e0] disabled:opacity-40"
             >
               <span className="text-xs" aria-hidden="true">A</span>
             </button>
-            <span className="w-px self-stretch bg-border" aria-hidden="true" />
             <button
               type="button"
               onClick={() => setScaleIndex((i) => Math.min(SCALES.length - 1, i + 1))}
               disabled={scaleIndex === SCALES.length - 1}
               aria-label="Aumentar tamaño del texto"
-              className="flex h-11 w-12 items-center justify-center font-bold leading-none text-foreground transition-colors hover:bg-muted disabled:opacity-40"
+              className="flex size-9 items-center justify-center rounded-full font-bold leading-none text-[#333333] transition-colors hover:bg-[#e4e4e0] disabled:opacity-40"
             >
               <span className="text-2xl" aria-hidden="true">A</span>
             </button>
@@ -219,35 +217,33 @@ export default function FormularioPage() {
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">
         {/* Progress */}
-        <section aria-label="Progreso del formulario" className="flex flex-col gap-2">
-          <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
+        <section aria-label="Progreso del formulario" className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-between text-[13px] text-muted-foreground">
             <span>
               Paso {step + 1} de {STEPS.length}
             </span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <ol className="flex items-center gap-1.5" aria-hidden="true">
-            {STEPS.map((s, i) => (
-              <li
-                key={s.title}
-                className={cn(
-                  "h-2 flex-1 rounded-full transition-colors",
-                  i <= step ? "bg-primary" : "bg-border",
-                )}
-              />
-            ))}
-          </ol>
+          <div
+            className="h-[3px] w-full overflow-hidden rounded-full bg-border"
+            aria-hidden="true"
+          >
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </section>
 
         {/* Step content — font size scales with the A-/A+ control */}
         <section
-          className="mt-8 flex flex-1 flex-col"
+          className="mt-10 flex flex-1 flex-col"
           style={{ fontSize: `${fontPx}px` }}
         >
-          <p className="text-[0.8125em] font-semibold uppercase tracking-[0.12em] text-primary">
+          <p className="text-[0.75em] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
             Formulario del paciente
           </p>
-          <h1 className="mt-1.5 text-balance text-[2.125em] font-bold leading-[1.1] tracking-tight text-foreground">
+          <h1 className="mt-3 text-balance text-[2.125em] font-bold leading-[1.1] tracking-tight text-foreground">
             {current.title}
           </h1>
           <p className="mt-2 text-pretty text-[0.9375em] leading-relaxed text-muted-foreground">

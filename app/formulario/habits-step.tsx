@@ -71,10 +71,10 @@ const ALIMENTACION_ITEMS: { value: Exclude<Alimentacion, "">; label: string }[] 
 ];
 
 const inputClass =
-  "h-auto w-full rounded-xl border border-border bg-background px-4 py-3.5 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-input focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25";
+  "h-auto w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-[#cccccc] focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20";
 
 const selectTriggerClass =
-  "w-full justify-between rounded-xl border-input px-4 py-3.5 text-[1em] font-medium text-foreground data-[size=default]:h-auto data-placeholder:font-normal data-placeholder:text-muted-foreground [&>svg]:text-foreground/60";
+  "w-full justify-between rounded-lg border-input px-3.5 py-2.5 text-[1em] font-medium text-foreground data-[size=default]:h-auto data-placeholder:font-normal data-placeholder:text-muted-foreground [&>svg]:text-foreground/60";
 
 // Resaltado de la opción: fondo de marca SÓLIDO con texto blanco (mismo patrón que paso 1).
 const selectItemClass =
@@ -82,7 +82,7 @@ const selectItemClass =
 
 // Misma fila seleccionable con radio que usan los pasos anteriores.
 const radioRowClass =
-  "flex cursor-pointer items-center gap-3 rounded-xl border border-input bg-background p-3.5 transition-colors has-data-checked:border-primary";
+  "flex cursor-pointer items-center gap-3 border-b border-border py-3 text-foreground transition-colors last:border-b-0 has-data-checked:text-primary";
 
 /** Indica si los campos obligatorios del paso están completos. */
 export function isHabitsDataValid(data: HabitsData): boolean {
@@ -144,7 +144,7 @@ function SiNoQuestion({
       <RadioGroup
         value={value}
         onValueChange={(v) => onValueChange(v as SiNo)}
-        className="gap-2.5"
+        className="gap-0"
       >
         {SI_NO_OPTIONS.map((option) => (
           <label key={option.value} className={radioRowClass}>
@@ -203,7 +203,7 @@ export function HabitsStep({ value, onChange }: HabitsStepProps) {
   const exFumador = value.fuma === "ex";
 
   return (
-    <div className="mt-6 flex flex-col gap-6">
+    <div className="mt-8 flex flex-col gap-6">
       {/* Tabaquismo */}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-[1em] font-medium text-foreground">
@@ -233,7 +233,7 @@ export function HabitsStep({ value, onChange }: HabitsStepProps) {
                     },
             )
           }
-          className="gap-2.5"
+          className="gap-0"
         >
           {FUMA_OPTIONS.map((option) => (
             <label key={option.value} className={radioRowClass}>

@@ -39,11 +39,11 @@ const HACE_CUANTO_OPTIONS: { value: Exclude<HaceCuanto, "">; label: string }[] =
 ];
 
 const inputClass =
-  "h-auto w-full rounded-xl border border-border bg-background px-4 py-3.5 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-input focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25";
+  "h-auto w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-[1em] leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-[#cccccc] focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20";
 
 // Misma fila seleccionable con radio que usa "Sexo" en el paso 1.
 const radioRowClass =
-  "flex cursor-pointer items-center gap-3 rounded-xl border border-input bg-background p-3.5 transition-colors has-data-checked:border-primary";
+  "flex cursor-pointer items-center gap-3 border-b border-border py-3 text-foreground transition-colors last:border-b-0 has-data-checked:text-primary";
 
 /** Indica si los campos obligatorios del paso están completos. */
 export function isActivityDataValid(data: ActivityData): boolean {
@@ -67,7 +67,7 @@ export function ActivityStep({ value, onChange }: ActivityStepProps) {
   const practiceYes = value.practica === "si";
 
   return (
-    <div className="mt-6 flex flex-col gap-6">
+    <div className="mt-8 flex flex-col gap-6">
       {/* ¿Hacés ejercicio o practicás deporte? */}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-[1em] font-medium text-foreground">
@@ -83,7 +83,7 @@ export function ActivityStep({ value, onChange }: ActivityStepProps) {
                 : { practica: v as PracticaDeporte },
             )
           }
-          className="gap-2.5"
+          className="gap-0"
         >
           {PRACTICA_OPTIONS.map((option) => (
             <label key={option.value} className={radioRowClass}>
@@ -113,7 +113,7 @@ export function ActivityStep({ value, onChange }: ActivityStepProps) {
               <RadioGroup
                 value={value.horasSemana}
                 onValueChange={(v) => onChange({ horasSemana: v as HorasSemana })}
-                className="gap-2.5"
+                className="gap-0"
                 disabled={!practiceYes}
               >
                 {HORAS_OPTIONS.map((option) => (
@@ -133,7 +133,7 @@ export function ActivityStep({ value, onChange }: ActivityStepProps) {
               <RadioGroup
                 value={value.haceCuanto}
                 onValueChange={(v) => onChange({ haceCuanto: v as HaceCuanto })}
-                className="gap-2.5"
+                className="gap-0"
                 disabled={!practiceYes}
               >
                 {HACE_CUANTO_OPTIONS.map((option) => (
